@@ -2,7 +2,7 @@
 
 [![Compete Pulse Actions](https://github.com/enriquekalven/compete-pulse/actions/workflows/pulse.yml/badge.svg)](https://github.com/enriquekalven/compete-pulse/actions)
 [![Standard: Vertex AI ADK](https://img.shields.io/badge/Standard-Vertex%20AI%20ADK-blue)](https://github.com/google/adk-python)
-[![Intelligence: Gemini 3.1 Pro](https://img.shields.io/badge/Intelligence-Gemini%202.5%20Pro-purple)](https://cloud.google.com/vertex-ai)
+[![Intelligence: Gemini 3.1 Pro](https://img.shields.io/badge/Intelligence-Gemini%203.1%20Pro-purple)](https://cloud.google.com/vertex-ai)
 
 **Compete Pulse** is a high-fidelity intelligence engine designed to track, analyze, and neutralize competitor AI "Launch Theater." It bridges the gap between raw technical updates (LLM benchmarks, SDK releases) and **Enterprise-Ready Sales Plays** for Google Cloud field teams.
 
@@ -20,8 +20,8 @@ graph TD
 
     subgraph "Compete Pulse Brain (Gemini 3.1 Hub)"
         W[Watcher: Feed Ingestion]
-        R[Ranker: Impact Scoring /Flash/]
-        S[Scribe: Hybrid Synthesis /Pro/]
+        R[Ranker: Impact Scoring /3.1 Flash Lite/]
+        S[Scribe: Hybrid Synthesis /3.1 Pro/]
         GA[Gap Analyst: Strategic Battlecards]
         
         W --> R
@@ -73,6 +73,13 @@ Uses **Gemini 3.1 Pro** to distill technical changes into three actionable talk 
 
 ---
 
+## 📂 Strategic Assets
+The agent maintains a suite of high-signal documents for the field:
+*   [**Key Differentiators**](compete-docs/key_differentiators.md): Strategic breakdown of Google Cloud vs. Competitor Previews.
+*   [**Email Pulse Draft**](compete-docs/email_pulse_draft.md): Pre-formatted executive updates for distribution lists.
+
+---
+
 ## 🛠️ Field Usage
 
 ### Installation
@@ -87,7 +94,6 @@ compete-pulse report --days 2
 
 ### Strategic Email Broadcast
 ```bash
-# Uses COMPETE_PULSE_SENDER_EMAIL & COMPETE_PULSE_SENDER_PASSWORD
 compete-pulse email "field-team@google.com" --infographic
 ```
 
@@ -96,6 +102,18 @@ compete-pulse email "field-team@google.com" --infographic
 # Query the historical knowledge base for past competitor moves
 compete-pulse query "How did we respond to Claude 3.5 Sonnet launch?"
 ```
+
+---
+
+## 🔐 Environment Configuration
+To run the agent locally or in CI/CD, configure the following:
+
+| Variable | Description |
+| :--- | :--- |
+| `GOOGLE_API_KEY` | API Key for Gemini 3.1 Flash Lite/Pro access. |
+| `COMPETE_PULSE_SENDER_EMAIL` | Sender address for automated pulses. |
+| `COMPETE_PULSE_SENDER_PASSWORD` | Google **App Password** for secure delivery. |
+| `GCHAT_WEBHOOK_URL` | Webhook for real-time corridor alerts. |
 
 ---
 
