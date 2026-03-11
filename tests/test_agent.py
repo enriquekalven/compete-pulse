@@ -33,9 +33,9 @@ def test_bridge_roadmap_to_field():
     assert 'PARTNER DEPTH' in bridge
     
     bridge = tools.bridge_roadmap_to_field({'title': 'v0.2.1', 'source': 'openai-agent-sdk-js'})
-    assert 'PARTNER CONTEXT' in bridge
+    assert 'COMPETITIVE WATCH' in bridge
     bridge = tools.bridge_roadmap_to_field({'title': 'New multi-agent orchestration features'})
-    assert 'PARTNER CONTEXT' in bridge
+    assert 'COMPETITIVE WATCH' in bridge
     
     bridge = tools.bridge_roadmap_to_field({'title': 'Random Product Update'})
     assert 'velocity' in bridge
