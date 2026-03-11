@@ -279,7 +279,7 @@ class CompetePulseAgent:
             if len(item.get('summary', '')) < 50:
                 try:
                     gen_prompt = f"Based on the title '{item['title']}' from source '{item['source']}', provide a 2-sentence technical summary of what this update likely entails for an AI Engineer. Return ONLY the summary."
-                    gen_resp = self.client.models.generate_content(model='gemini-2.5-flash', contents=gen_prompt)
+                    gen_resp = self.client.models.generate_content(model='gemini-3.1-flash-lite', contents=gen_prompt)
                     item['summary'] = gen_resp.text.strip()
                 except Exception:
                     pass
@@ -288,14 +288,14 @@ class CompetePulseAgent:
             item['bridge'] = self._scrub_pii(item['bridge'])
             try:
                 tag_prompt = f"Categorize this technical update with 1-2 keywords (e.g. Governance, Security, UX, Performance, Scalability). Update: {item['title']}. Return only keywords separated by commas."
-                tag_resp = self.client.models.generate_content(model='gemini-2.5-flash', contents=tag_prompt)
+                tag_resp = self.client.models.generate_content(model='gemini-3.1-flash-lite', contents=tag_prompt)
                 item['tags'] = [t.strip() for t in tag_resp.text.split(',')]
             except Exception:
                 item['tags'] = []
             if len(item.get('summary', '')) > 200:
                 try:
                     refine_prompt = f"Summarize this for a technical business audience into 3 distinct markdown bullet points. Focus on 'Key Feature', 'Customer Value', and 'Sales Play'. Use bold labels for each. Content: {item['summary']}"
-                    resp = self.client.models.generate_content(model='gemini-2.5-flash', contents=refine_prompt)
+                    resp = self.client.models.generate_content(model='gemini-3.1-flash-lite', contents=refine_prompt)
                     item['summary'] = resp.text.strip()
                 except Exception:
                     pass
@@ -337,7 +337,7 @@ class CompetePulseAgent:
                 - Keep it strictly professional and business-focused.
                 </constraints>
                 """
-                resp = self.client.models.generate_content(model='gemini-2.5-pro', contents=tldr_prompt)
+                resp = self.client.models.generate_content(model='gemini-3.1-pro', contents=tldr_prompt)
                 tldr = resp.text.strip()
             except Exception:
                 pass
@@ -394,7 +394,7 @@ class CompetePulseAgent:
         </constraints>
         """
         
-        resp = self.client.models.generate_content(model='gemini-2.5-pro', contents=prompt)
+        resp = self.client.models.generate_content(model='gemini-3.1-pro', contents=prompt)
         return resp.text.strip()
 
     def _rank_by_impact(self, items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -426,7 +426,7 @@ class CompetePulseAgent:
         
         try:
             # Clean up potential markdown formatting if Gemini returns it
-            resp = self.client.models.generate_content(model='gemini-2.0-flash', contents=prompt)
+            resp = self.client.models.generate_content(model='gemini-3.1-flash-lite', contents=prompt)
             clean_json = resp.text.strip().replace('```json', '').replace('```', '')
             # Remove any trailing commas or malformed bits Gemini might add
             clean_json = re.sub(r',\s*]', ']', clean_json)
@@ -518,7 +518,7 @@ class CompetePulseAgent:
             Include 1-2 relevant emojis to make it stand out in field reports.
             </format>
             """
-            response = self.client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+            response = self.client.models.generate_content(model='gemini-3.1-flash-lite', contents=prompt)
             summary = response.text.strip()
             self._summary_cache[cache_key] = summary
             return summary
@@ -532,7 +532,7 @@ class CompetePulseAgent:
         if self.client:
             try:
                 refine_prompt = f'Summarize this for a business audience in 2 sentences focus on impact: {summary}'
-                resp = self.client.models.generate_content(model='gemini-2.0-flash-exp', contents=refine_prompt)
+                resp = self.client.models.generate_content(model='gemini-3.1-flash-lite', contents=refine_prompt)
                 summary = resp.text.strip()
             except Exception:
                 pass

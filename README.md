@@ -2,7 +2,7 @@
 
 [![Compete Pulse Actions](https://github.com/enriquekalven/compete-pulse/actions/workflows/pulse.yml/badge.svg)](https://github.com/enriquekalven/compete-pulse/actions)
 [![Standard: Vertex AI ADK](https://img.shields.io/badge/Standard-Vertex%20AI%20ADK-blue)](https://github.com/google/adk-python)
-[![Intelligence: Gemini 2.5 Pro](https://img.shields.io/badge/Intelligence-Gemini%202.5%20Pro-purple)](https://cloud.google.com/vertex-ai)
+[![Intelligence: Gemini 3.1 Pro](https://img.shields.io/badge/Intelligence-Gemini%202.5%20Pro-purple)](https://cloud.google.com/vertex-ai)
 
 **Compete Pulse** is a high-fidelity intelligence engine designed to track, analyze, and neutralize competitor AI "Launch Theater." It bridges the gap between raw technical updates (LLM benchmarks, SDK releases) and **Enterprise-Ready Sales Plays** for Google Cloud field teams.
 
@@ -18,7 +18,7 @@ graph TD
         C3[Market Trends: SiliconAngle/SemiAnalysis]
     end
 
-    subgraph "Compete Pulse Brain (Gemini 2.5 Hub)"
+    subgraph "Compete Pulse Brain (Gemini 3.1 Hub)"
         W[Watcher: Feed Ingestion]
         R[Ranker: Impact Scoring /Flash/]
         S[Scribe: Hybrid Synthesis /Pro/]
@@ -63,10 +63,10 @@ graph TD
 The **Watcher** scans official release feeds (Vertex AI, Anthropic, OpenAI) and code movements (ADK, A2UI, Genkit) every 24-48 hours.
 
 ### 2. Impact Ranking (Flash Engine)
-Uses **Gemini 2.5 Flash** to assign a **Strategic Impact Score (1-100)**. This ensures major launches like Gemini 3.1 or Sovereign AI updates are prioritized over minor SDK patches.
+Uses **Gemini 3.1 Flash Lite** to assign a **Strategic Impact Score (1-100)**. This ensures major launches like Gemini 3.1 or Sovereign AI updates are prioritized over minor SDK patches.
 
 ### 3. Executive Synthesis (Pro Engine)
-Uses **Gemini 2.5 Pro** to distill technical changes into three actionable talk tracks:
+Uses **Gemini 3.1 Pro** to distill technical changes into three actionable talk tracks:
 *   **Key Feature**: The technical "What."
 *   **Customer Value**: The business "Why."
 *   **Compete Play**: The tactical "How" to win against the rival solution.
