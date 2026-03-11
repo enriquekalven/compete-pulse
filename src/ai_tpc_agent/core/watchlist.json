@@ -117,5 +117,79 @@
       "description": "LangGraph - Custom Multi-Agent Control Flows",
       "category": "roadmap"
     }
+  },
+  "market_intelligence": {
+    "openai-news": {
+      "feed": "https://openai.com/news/rss.xml",
+      "description": "OpenAI - Official News & Model Releases",
+      "category": "competitive"
+    },
+    "anthropic-blog": {
+      "feed": "https://www.anthropic.com/blog/feed",
+      "description": "Anthropic - Technical Updates, Claude Releases & Cowork",
+      "category": "competitive"
+    },
+    "microsoft-ai": {
+      "feed": "https://blogs.microsoft.com/ai/feed",
+      "description": "Microsoft AI - Research & Copilot Strategy",
+      "category": "competitive"
+    },
+    "microsoft-copilot": {
+      "feed": "https://techcommunity.microsoft.com/t5/microsoft-365-copilot-blog/bg-p/Microsoft365CopilotBlog/rss",
+      "description": "Microsoft 365 Copilot - Product Updates & SDKs",
+      "category": "competitive"
+    },
+    "meta-ai-blog": {
+      "feed": "https://engineering.fb.com/category/ai/feed/",
+      "description": "Meta AI - Engineering & Research Blog",
+      "category": "competitive"
+    },
+    "huggingface-blog": {
+      "feed": "https://huggingface.co/blog/feed.xml",
+      "description": "Hugging Face - Ecosystem & Model Trends",
+      "category": "competitive"
+    },
+    "langchain-blog": {
+      "feed": "https://blog.langchain.dev/rss/",
+      "description": "LangChain - Agentic Orchestration & SDK Updates",
+      "category": "ecosystem"
+    },
+    "llamaindex-blog": {
+      "feed": "https://llamaindex.medium.com/feed",
+      "description": "LlamaIndex - Data Frameworks & RAG Trends",
+      "category": "ecosystem"
+    },
+    "pinecone-blog": {
+      "feed": "https://www.pinecone.io/blog/feed/",
+      "description": "Pinecone - Vector Database & Retrieval Updates",
+      "category": "ecosystem"
+    },
+    "siliconangle-ai": {
+      "feed": "https://siliconangle.com/category/ai/feed/",
+      "description": "SiliconAngle - Enterprise AI & Cloud Trends",
+      "category": "competitive"
+    }
+  },
+  "precision_benchmarks": {
+    "artificial-analysis": {
+      "feed": "https://artificialanalysis.ai/articles",
+      "description": "Artificial Analysis - Model Performance & Cost Benchmarks",
+      "category": "benchmarks"
+    },
+    "llm-stats": {
+      "feed": "https://llm-stats.com/",
+      "description": "LLM Stats - Latency & Throughput Comparison",
+      "category": "benchmarks"
+    },
+    "semianalysis": {
+      "feed": "https://semianalysis.substack.com/feed",
+      "description": "SemiAnalysis - Compute Economics & AI Infrastructure",
+      "category": "trends"
+    },
+    "lmsys-blog": {
+      "feed": "https://lmsys.org/blog/",
+      "description": "LMSYS - Chatbot Arena & Human Preference Leaderboards",
+      "category": "benchmarks"
+    }
   }
 }

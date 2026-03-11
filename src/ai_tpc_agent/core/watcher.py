@@ -28,7 +28,8 @@ def fetch_recent_updates(url: str, max_items: int = 5) -> List[Dict[str, str]]:
     """
     Fetches the most recent updates from an Atom, RSS, or HTML page.
     """
-    if any(url.lower().endswith(ext) for ext in ['.xml', '.atom', '.rss']):
+    # Detect Feed URLs (Atom, RSS, XML)
+    if any(ext in url.lower() for ext in ['.xml', '.atom', '.rss', '/rss', '/feed']):
         try:
             items = _fetch_from_feed(url, max_items)
             if items:

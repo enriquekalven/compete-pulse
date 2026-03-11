@@ -36,8 +36,12 @@ class TPCTools:
         knowledge_base = []
         hub = watchlist.get('ai_knowledge_hub', {})
         roads = watchlist.get('roadmap_trackers', {})
+        market = watchlist.get('market_intelligence', {})
+        bench = watchlist.get('precision_benchmarks', {})
         sources = hub.copy()
         sources.update(roads)
+        sources.update(market)
+        sources.update(bench)
         for name, info in sources.items():
             console.print(f'[dim]📡 Scanning {name}...[/dim]')
             try:
@@ -60,18 +64,26 @@ class TPCTools:
         title = knowledge_item.get('title', '').lower()
         bridge_context = 'This update improves developer velocity and aligns with the 2026 Sovereign AI themes.'
         title_and_source = (title + ' ' + knowledge_item.get('source', '').lower())
-        if any((term in title_and_source for term in ['claude', 'anthropic', 'opus', 'sonnet', 'haiku'])):
-            bridge_context = 'PARTNER DEPTH: New Claude/Anthropic updates. Essential for multi-model strategy and agentic tool diversity.'
-        elif any((term in title_and_source for term in ['openai', 'multi-agent', 'swarm'])):
-            bridge_context = 'PARTNER CONTEXT: OpenAI Agent SDK update. Critical for cross-ecosystem multi-agent orchestration and comparison.'
+        if any((term in title_and_source for term in ['claude', 'anthropic', 'opus', 'sonnet', 'haiku', 'cowork'])):
+            bridge_context = 'PARTNER DEPTH: New Claude/Anthropic updates. **Google Response:** Focus on Vertex AI as the "Enterprise Model Garden" where Claude runs with GCP security/privacy.'
+        elif any((term in title_and_source for term in ['openai', 'gpt-4', 'gpt-5', 'o1', 'sora', 'multi-agent', 'swarm'])):
+            bridge_context = 'COMPETITIVE WATCH: New OpenAI update. **Google Response:** Highlight Gemini 1.5 Pro 2M context window and deep Workspace integration which OpenAI lacks.'
+        elif any((term in title_and_source for term in ['meta', 'llama', 'l3'])):
+            bridge_context = 'OPEN MODELS: Meta/Llama update. **Google Response:** Position Vertex AI as the best place to tune and deploy Llama with enterprise-grade infrastructure.'
         elif any((term in title_and_source for term in ['mcp', 'model context protocol'])):
-            bridge_context = 'INDUSTRY STANDARD: Model Context Protocol (MCP) update. Essential for standardizing how agents connect to data and tools.'
-        elif any((term in title_and_source for term in ['genkit', 'firebase'])):
-            bridge_context = "GOOGLE ECOSYSTEM: Firebase Genkit update. Key for developers building AI-orchestrated apps in the Google/Firebase stack."
-        elif any((term in title_and_source for term in ['autogen', 'crewai', 'langgraph'])):
-            bridge_context = "COMPETITIVE PULSE: Major update in rival agent frameworks (AutoGen/CrewAI/LangGraph). Monitor for feature parity and market shift."
-        elif any((term in title_and_source for term in ['agent', 'builder'])):
-            bridge_context = "CRITICAL: Enhances Agent Builder. Field should focus on 'Low-Code to Pro-Code' transition stories."
+            bridge_context = 'INDUSTRY STANDARD: Model Context Protocol (MCP) update. Essential for standardizing how agents connect to data and tools. Google supports open standards through Vertex AI.'
+        elif any((term in title_and_source for term in ['langchain', 'llamaindex'])):
+            bridge_context = 'SDK TRENDS: New updates in open orchestration. **Google Response:** Pivot to Vertex AI Reasoning Engine for managed, secure agent deployment and the ADK for standardized, multi-agent architectures.'
+        elif any((term in title_and_source for term in ['pinecone', 'vector', 'milvus', 'weaviate'])):
+            bridge_context = 'VECTOR DB WATCH: Market shift in retrieval. **Google Response:** Highlight Vertex AI Search/Vector Search and AlloyDB for integrated, managed vector capabilities with lower TCO.'
+        elif any((term in title_and_source for term in ['microsoft', 'azure', 'phind', 'mistral', 'copilot'])):
+            bridge_context = 'COMPETITIVE ECOSYSTEM: Rival AI platform update. **Google Response:** Leverage Vertex AI Multi-Cloud and the "Open Model Garden" philosophy to offer more choice than locked-in competitors.'
+        elif any((term in title_and_source for term in ['benchmark', 'leaderboard', 'arena', 'artificial analysis', 'llm-stats'])):
+            bridge_context = 'BENCHMARK SHIFT: New performance data detected. **Google Response:** Pivot from "Raw Speed" to "Production Quality." Highlight Gemini’s consistency, lower hallucination rates in RAG, and the "Enterprise SLOs" that community benchmarks don’t measure.'
+        elif any((term in title_and_source for term in ['compute', 'gpu', 'economics', 'semianalysis'])):
+            bridge_context = 'COMPUTE INTELLIGENCE: Market shift in AI economics. **Google Response:** Highlight Google’s vertically integrated stack (TPU v5p) which provides better long-term TCO and availability than GPU-constrained competitors.'
+        elif any((term in title_and_source for term in ['genkit', 'firebase', 'agent', 'builder'])):
+            bridge_context = "GOOGLE ECOSYSTEM: Enhances Agent Builder/Genkit. Field should focus on 'Low-Code to Pro-Code' transition stories."
         elif any((term in title_and_source for term in ['gemini', 'ge', 'generative engine'])):
             bridge_context = "GE UPDATE: New Gemini models/features. Highlight 'Context Window' and 'Reasoning Engine' improvements."
         elif any((term in title_and_source for term in ['security', 'compliance', 'governance'])):
@@ -298,22 +310,30 @@ class TPCAgent:
                 </system_instructions>
                 
                 <context>
-                Review the technical roadmap updates below for recent shifts in Vertex AI and the Agent Ecosystem.
+                Review the technical roadmap updates below for recent shifts in Vertex AI, the AI Ecosystem, and Performance Benchmarks (LMSYS, Artificial Analysis, etc).
                 Titles:
                 {titles}
                 </context>
                 
                 <task>
+<<<<<<< Updated upstream
                 Provide a high-level 'Executive Synthesis' (2-3 sentences) summarizing the collective theme of these updates.
                 If there are multiple sources (e.g. Google, Anthropic, OpenAI), highlight the 'Ecosystem Synergy' or competitive shifts.
                 Focus on the actionable impact for field architects. Use professional, high-signal language with 2-3 relevant emojis.
                 Avoid generic boilerplate. Make it feel fresh and specific to these titles.
+=======
+                Provide a high-level 'Executive Synthesis' summarizing the theme of these recent AI updates.
+                - If there are competitive updates or benchmark shifts, include a 'Competitive & Performance Pulse' section.
+                - Clearly articulate 'How Google Responds' or what Google's unique advantage is in this context.
+                - Focus on "Quality of Service" and "Production Reliability" over "Raw Leaderboard Rank".
+                - Use professional but engaging language with 2-3 relevant emojis.
+>>>>>>> Stashed changes
                 </task>
 
                 <constraints>
                 - DO NOT include internal project names.
                 - DO NOT hallucinate dates or features not present in the titles.
-                - If you don't know the collective theme, say "Diverse ecosystem updates".
+                - Focus on "Vertex AI Ecosystem" vs "Single Model Vendors".
                 - Keep it strictly professional and business-focused.
                 </constraints>
                 """
@@ -494,6 +514,7 @@ class TPCAgent:
 
             <format>
             One concise, high-impact talk track (1-2 sentences) explaining WHY this matters for customers. 
+            If the update is about a non-Google model (OpenAI, Anthropic, Meta), include a second section: "**Google Response:**" followed by a 1-sentence counter-point or positioning strategy.
             Include 1-2 relevant emojis to make it stand out in field reports.
             </format>
             """
