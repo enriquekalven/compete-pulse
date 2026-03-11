@@ -1,8 +1,8 @@
-# AI TPC Agent 🚀
+# Compete Pulse: AI & Agentic Intelligence 🚀
 
-Technical Program Consultant (TPC) Agent designed to browse, track, and promote AI knowledge and product roadmaps for field teams.
+A specialized intelligence hub focused on tracking **AI & Agentic** market shifts, LLM model competitions, and Google Cloud's strategic differentiators.
 
-![AI TPC Agent Architecture](docs/architecture.png)
+![Compete Pulse Architecture](docs/architecture.png)
 
 ## Architecture
 ```mermaid
@@ -151,15 +151,13 @@ If communication channels are restricted, you can run the agent to append to a l
 tpc-agent report >> FIELD_PILOT_LOG.md
 ```
 
-## Intelligence Targets (Powered by Gemini)
-The agent is specifically tuned to recognize and bridge these key themes:
-- **Gemini 3.1 Pro & 2.5 Pro**: Highlighting reasoning breakthroughs and long-context capabilities.
-- **Strategic Battlecard**: Identifying gaps in Google roadmap vs. Anthropic/OpenAI tools.
-- **Agent Builder**: Translating low-code simplicity to pro-code extensibility.
-- **Partner Models & Interop**: Supporting model-diversity narratives on Vertex AI (Claude, Llama).
-- **Developer Frameworks (ADK/A2UI)**: Promoting standard-first agentic architecture.
-- **Sovereign AI**: Matching compliance updates to regional deal blockers.
-- **Security**: Connecting IAM/Encryption shifts to enterprise governance themes.
+## Intelligence Targets (Strategic Compete)
+The agent is specifically tuned to analyze market movements and consolidate Google's competitive edge:
+- **LLM Model Competes**: Tracking Gemini's performance vs. GPT-4o, Claude 3.5/3.7, and Llama 4 benchmarks.
+- **Enterprise Resilience**: Highlighting Google's GA stability vs. competitor "Preview" theater.
+- **Agentic Orchestration**: Comparing Vertex AI Agent Builder and ADK to standalone LLM APIs.
+- **Context Dominance**: Leveraging Gemini's 2M context window as a primary moat for large-scale enterprise workflows.
+- **Security & Sovereignty**: Mapping Cloud IAM and data residency to regional competitive blockers.
 
 ---
 
