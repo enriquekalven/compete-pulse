@@ -1,165 +1,115 @@
-# Compete Pulse: AI & Agentic Intelligence 🚀
+# Compete Pulse: Strategic AI & Agentic Intelligence ⚔️
 
-A specialized intelligence hub focused on tracking **AI & Agentic** market shifts, LLM model competitions, and Google Cloud's strategic differentiators.
+[![Compete Pulse Actions](https://github.com/enriquekalven/compete-pulse/actions/workflows/pulse.yml/badge.svg)](https://github.com/enriquekalven/compete-pulse/actions)
+[![Standard: Vertex AI ADK](https://img.shields.io/badge/Standard-Vertex%20AI%20ADK-blue)](https://github.com/google/adk-python)
+[![Intelligence: Gemini 2.5 Pro](https://img.shields.io/badge/Intelligence-Gemini%202.5%20Pro-purple)](https://cloud.google.com/vertex-ai)
 
-![Compete Pulse Architecture](docs/architecture.png)
+**Compete Pulse** is a high-fidelity intelligence engine designed to track, analyze, and neutralize competitor AI "Launch Theater." It bridges the gap between raw technical updates (LLM benchmarks, SDK releases) and **Enterprise-Ready Sales Plays** for Google Cloud field teams.
 
-## Architecture
+---
+
+## 🏗️ Intelligence Architecture
+
 ```mermaid
 graph TD
-    subgraph Sources
-        GC[Google Cloud Blog & Releases]
-        GH[GitHub Roadmap Activity]
-        PA[Partner Feeds: Anthropic/OpenAI]
+    subgraph "External Signals (The Noise)"
+        C1[Competitor Previews: O1/GPT-5/Claude 3.7]
+        C2[Rival SDKs: AutoGen/LangGraph/OpenAI SDK]
+        C3[Market Trends: SiliconAngle/SemiAnalysis]
     end
 
-    subgraph "Compete Pulse Intelligence Engine"
-        W[Advanced Pulse Watcher]
-        R[Pass 1: Strategic Impact Ranking /Gemini Flash/]
-        A[Pass 2: Hybrid Synthesis /Gemini Pro + Flash/]
-        IG[Generative AI: Strategic Infographics]
-        GA[Strategic Gap Analysis & Battlecards]
+    subgraph "Compete Pulse Brain (Gemini 2.5 Hub)"
+        W[Watcher: Feed Ingestion]
+        R[Ranker: Impact Scoring /Flash/]
+        S[Scribe: Hybrid Synthesis /Pro/]
+        GA[Gap Analyst: Strategic Battlecards]
         
         W --> R
-        R --> A
-        A --> IG
-        A --> GA
+        R --> S
+        S --> GA
     end
 
-    subgraph Bridges
-        GI[GitHub Issues /Pulse History/]
-        EM[Email Bridge /Premium HTML/]
-        GChat[Google Chat /Real-time/]
+    subgraph "Field Promotion (The Signal)"
+        EM[Premium HTML Email Pulse]
+        GH[Searchable Pulse History /Issues/]
+        GC[Real-time GChat Alerts]
+        IG[Strategic Infographics /Imagen 3/]
     end
 
-    GC --> W
-    GH --> W
-    PA --> W
+    C1 --> W
+    C2 --> W
+    C3 --> W
     
-    IG --> EM
     GA --> EM
-    GA --> GI
-    
-    A --> GI
-    A --> EM
-    A --> GChat
-    
-    subgraph "CI/CD Pipeline"
-        GAP[GitHub Actions Automation]
-        GAP --> |Automated Pulse| W
-    end
+    GA --> GH
+    S --> IG
+    IG --> EM
 ```
 
-## Features
-- **Hybrid Intelligence Strategy**: Orchestrated use of **Gemini 2.5 Pro** for deep executive synthesis and **Gemini 2.5 Flash** for high-velocity technical bridging.
-- **Strategic Impact Ranking**: Uses AI to score updates (1-100) based on field relevance, ensuring "Mission Critical" launches (like Gemini 3.1) are never buried by SDK noise.
-- **Strategic Battlecards & Gap Analysis**: Automatically compares Google's roadmap against competitors (Anthropic/OpenAI) to identify feature gaps and "First-Mover" advantages.
-- **Automated Pulse Infographics**: Generates high-signal visual dashboards of the last 24-48 hours of AI roadmap shifts.
-- **Ecosystem Watcher**: Tracks Vertex AI, GitHub codebases (ADK, A2UI, Genkit), and Partner newsrooms in real-time.
-- **Enterprise Hardening**: Built-in PII scrubbing, exponential backoff, and prompt-injection validation.
+---
 
-## How it Works
-The Compete Pulse Agent follows a structured **Retrieve -> Synthesize -> Promote** lifecycle:
+## 🎯 Core Intelligence Moats
 
-### 1. Automated Retrieval (The "Watcher")
-The agent's **Watcher** engine wakes up (via GitHub Actions) and uses custom scrapers to scan:
-*   **Official Release Notes**: Vertex AI, Gemini Enterprise, and Generative AI.
-*   **Developer Repositories**: Source code movements in the Google ADK and A2UI frameworks.
-*   **Industry Trends**: High-signal blogs and market analysis feeds.
+- **The "Context Moat"**: Automatically identifies opportunities to pitch Gemini's **2M token context window** against competitor context drowning.
+- **GA vs. Theater**: Differentiates between competitor "Research Previews" and Google's **General Availability** (GA) stability.
+- **Agentic Trinity Integration**: Connects **Vertex AI Models**, **Agent Builder**, and the **ADK** into a unified "Production-Ready" narrative.
+- **Grounding Validation**: Highlights Google Search-grade grounding as the ultimate cure for competitor hallucinations.
 
-### 2. AI Synthesis (The "Brain")
-Once retrieval is complete, the raw data is passed through a multi-pass synthesis engine:
-*   **Intelligent Ranking**: Use **Gemini 2.5 Flash** to analyze all incoming signals and assign an **Impact Score (1-100)**. This ensures that major releases like Gemini 3.1 always appear first.
-*   **Hybrid Deep Extraction**: Uses **Gemini 2.5 Pro** for the high-level executive summary and **Gemini 2.5 Flash** to convert technical changes into 3-bullet talk tracks:
-    *   **Key Feature**: Distills the technical essence.
-    *   **Customer Value**: Quantifies the business impact.
-    *   **Sales Play**: Provides the actionable strategy for field teams.
-*   **Strategic Gap Analysis**: Automatically analyzes the interplay between Google, Anthropic, and OpenAI to create a "Field Battlecard."
-*   **Strategic Infographics**: Generates visual dashboards directly from the synthesized pulse data.
-*   **Safety First**: Integrates a **Hardened PII Scrubber** and **Prompt Injection Validator** to ensure secure summaries.
+---
 
-### 3. Field Promotion (The "Bridges")
-The synthesized intel is pushed through various communication bridges:
-*   **Email**: A premium HTML report sent directly to field distribution lists.
-*   **GitHub Issues**: A persistent, searchable history of all technical pulses.
-*   **Google Chat**: Real-time card-based notifications for immediate visibility.
+## 🚀 How it Works (The Lifecycle)
 
-## Installation
+### 1. Automated Scrutiny
+The **Watcher** scans official release feeds (Vertex AI, Anthropic, OpenAI) and code movements (ADK, A2UI, Genkit) every 24-48 hours.
+
+### 2. Impact Ranking (Flash Engine)
+Uses **Gemini 2.5 Flash** to assign a **Strategic Impact Score (1-100)**. This ensures major launches like Gemini 3.1 or Sovereign AI updates are prioritized over minor SDK patches.
+
+### 3. Executive Synthesis (Pro Engine)
+Uses **Gemini 2.5 Pro** to distill technical changes into three actionable talk tracks:
+*   **Key Feature**: The technical "What."
+*   **Customer Value**: The business "Why."
+*   **Compete Play**: The tactical "How" to win against the rival solution.
+
+---
+
+## 🛠️ Field Usage
+
+### Installation
 ```bash
 pip install .
 ```
 
-## Usage
-### Local Report
+### Local Intelligence Report
 ```bash
-compete-pulse report
+compete-pulse report --days 2
 ```
 
-### Google Chat Broadcast
+### Strategic Email Broadcast
 ```bash
-compete-pulse chat --webhook-url "YOUR_WEBHOOK_URL"
+# Uses COMPETE_PULSE_SENDER_EMAIL & COMPETE_PULSE_SENDER_PASSWORD
+compete-pulse email "field-team@google.com" --infographic
 ```
 
-### Email Promotion
+### RAG Intelligence Query
 ```bash
-# Uses COMPETE_PULSE_SENDER_EMAIL and COMPETE_PULSE_SENDER_PASSWORD env vars
-compete-pulse email "ai-compete-pulse@google.com"
+# Query the historical knowledge base for past competitor moves
+compete-pulse query "How did we respond to Claude 3.5 Sonnet launch?"
 ```
-### GitHub Issues Broadcast
-```bash
-# Uses GITHUB_TOKEN and GITHUB_REPOSITORY env vars
-compete-pulse github
-```
-
-## Sample Terminal Output
-```text
-🚀 Compete Pulse Agent: FIELD PROMOTION REPORT (Last 2 Days)
-
-🌉 ROADMAP BRIDGE: FIELD TALK TRACKS
-╭─────────────────────────────────────────── [VERTEX-AI-RELEASES] ───────────────────────────────────────────╮
-│ Feature: Claude 3.5 Sonnet on Vertex AI                                                                    │
-│ Field Impact: PARTNER DEPTH: New Claude models on Vertex. Crucial for customers requesting model-diversity. │
-│ Action: Open Documentation                                                                                 │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭────────────────────────────────────────────── [GOOGLE-ADK] ────────────────────────────────────────────────╮
-│ Feature: v1.24.0 Release                                                                                   │
-│ Field Impact: DEV EXPERIENCE: ADK Update. Promotes standardized agent building. Essential for              │
-│ 'Agent-First' architecture talks.                                                                          │
-│ Action: Open Documentation                                                                                 │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-
-💡 AI KNOWLEDGE & MARKET TRENDS
-### Google Cloud AI Blog: Sovereign AI in 2026
-Source: Google Cloud AI Blog - Market Trends & Innovations
-Actionable Insight: New regulatory trends in EMEA are driving demand for local-residency AI models...
-[🔗 Read Full Update]
-
----
-```
-
-## Scheduling (Field Pulse)
-The repository includes a GitHub Action (`.github/workflows/pulse.yml`) to automatically process updates.
-
-**Secure Channel Options:**
-1. **GitHub Issues (Default)**: Reports are posted as issues in the current repo. Zero-config (uses `GITHUB_TOKEN`).
-2. **Google Chat**: Add `GCHAT_WEBHOOK_URL` to GitHub Secrets.
-3. **Email**: Add `COMPETE_PULSE_SENDER_EMAIL` and `COMPETE_PULSE_SENDER_PASSWORD` (App Password) to GitHub Secrets.
-
-## Alternative: Markdown Persistence
-If communication channels are restricted, you can run the agent to append to a local log:
-```bash
-compete-pulse report >> FIELD_PILOT_LOG.md
-```
-
-## Intelligence Targets (Strategic Compete)
-The agent is specifically tuned to analyze market movements and consolidate Google's competitive edge:
-- **LLM Model Competes**: Tracking Gemini's performance vs. GPT-4o, Claude 3.5/3.7, and Llama 4 benchmarks.
-- **Enterprise Resilience**: Highlighting Google's GA stability vs. competitor "Preview" theater.
-- **Agentic Orchestration**: Comparing Vertex AI Agent Builder and ADK to standalone LLM APIs.
-- **Context Dominance**: Leveraging Gemini's 2M context window as a primary moat for large-scale enterprise workflows.
-- **Security & Sovereignty**: Mapping Cloud IAM and data residency to regional competitive blockers.
 
 ---
 
-## 🗺️ Future Growth
-See the [**ROADMAP.md**](ROADMAP.md) for planned features, RAG integration, and internal data ingestion milestones.
+## 📊 Competitive Intelligence Targets
+*   **LLM Model Competes**: Gemini vs. GPT-4o, Claude 3.5/3.7, and Llama 4 benchmarks.
+*   **Enterprise Resilience**: GA stability vs. competitor "Waitlist" theater.
+*   **Agentic Orchestration**: Vertex AI Agent Builder vs. standalone "Toy" GUI builders.
+*   **Sovereignty & Security**: VPC-SC and Data Residency as regional deal-closers.
+
+---
+
+## 🗺️ Roadmap
+Check [**ROADMAP.md**](ROADMAP.md) for upcoming RAG enhancements, automated battlecard generation, and internal CRM integration milestones.
+
+---
+
+*Generated & Maintained by the Compete Pulse Agent*

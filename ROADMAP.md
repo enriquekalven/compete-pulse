@@ -1,45 +1,47 @@
-# 🗺️ AI TPC Agent Roadmap
+# 🗺️ Compete Pulse Roadmap
 
-This roadmap tracks the evolution of the AI TPC Agent from a "Pulse Dispatcher" to a full-scale "Intelligence Hub" as outlined in the [TPC Cloud AI Agent PRD].
+This roadmap tracks the evolution of **Compete Pulse** from a technical "Pulse Dispatcher" to a full-scale **Competitive Intelligence Hub** focused on AI and Agentic market dominance.
 
-## 🎯 Current Status: "Pulse Phase" (v0.1.0)
-- ✅ **Retrieve**: Scrapers for Vertex AI, Gemini Enterprise, GitHub, and PyPI.
-- ✅ **Synthesize**: Gemini 2.0 Flash integration for Talk Tracks and business summaries.
-- ✅ **Promote**: Automated broadcasting via Email, GitHub Issues, and Google Chat.
-- ✅ **Reliability**: Integrated regression test suite and GitHub Actions automation.
-- ✅ **Hardening (v0.1.1)**: Implemented PII Scrubber, Prompt Injection Validation, and Semantic Caching.
-- ✅ **Partner Intelligence (v0.1.2)**: Integrated Anthropic/Claude release monitoring and field talk tracks.
-- ✅ **Visual Synthesis**: NotebookLM-style infographic generation for high-impact summaries.
+## 🎯 Current Status: "Compete Phase" (v0.1.x)
+- ✅ **Strategic Watcher**: Scrapers for Vertex AI, Gemini Enterprise, and Competitors (Anthropic, OpenAI).
+- ✅ **Competitive Synthesis**: Gemini 2.5 Pro/Flash integration for "Compete Plays" and Gap Analysis.
+- ✅ **Multi-Bridge Promotion**: Automated broadcasting via Email (HTML), GitHub Issues, and Google Chat.
+- ✅ **Visual Strategy**: Strategic Infographic generation (Imagen 3) for executive dashboards.
+- ✅ **Field Resilience**: Integrated PII Scrubbing, Prompt Validation, and Semantic Caching.
 
 ---
 
 ## 🚀 Future Milestones
 
-### 🏗️ Phase 1: RAG & Persistence (Q1 2026)
-*Goal: Move from "What's new today" to "Ask me anything about AI Roadmaps."*
+### 🏗️ Phase 1: Deep Insight & RAG (Current Work)
+*Goal: Move from "What happened" to "How do we win."*
 
-- [x] **Vector Database Integration**: Implement persistent storage (Vertex AI RAG Engine) to store every historical pulse.
-- [x] **Retrieval Augmented Generation (RAG)**: Enable users to query the agent about historical shifts.
-- [x] **Serving Layer**: Finalized `tpc-agent serve` command exposing a FastAPI endpoint.
-- [ ] **Gemini Enterprise Registration**: Register the agent as a tool in the corporate Gemini UI.
+- [x] **Vector Intelligence**: Persistent storage via Vertex AI RAG Engine for historical competitor moves.
+- [x] **Context Querying**: Enable natural language queries via `compete-pulse query`.
+- [ ] **Automated Battlecards**: Generate high-fidelity competitive battlecards (PDF) directly from technical release delta.
+- [ ] **Agent Registry**: Register Compete Pulse as a tool within the Enterprise Gemini UI.
 
-### 📁 Phase 2: Internal Knowledge Ingestion (Q1-Q2 2026)
-*Goal: Ingest private Google data sources identified in the PRD.*
+### 📁 Phase 2: Enterprise Data Ingestion (Q1-Q2 2026)
+*Goal: Ingest private Google data sources to refine the competitive narrative.*
 
-- [ ] **Google Workspace Connectors**: Implement authenticated ingestion for Google Drive folders and GCS Buckets.
-- [ ] **Semantic Scrapers for `go/` links**: specialized scrapers for internal sites like `go/ai-seminars` and `go/prompt-live-replays`.
-- [ ] **Asset Management Sheets**: Integrate with TPC educator sheets for manual asset promotion.
+- [ ] **Internal Asset Scrapers**: specialised scrapers for `go/` links and internal AI strategy repositories.
+- [ ] **Workspace Connectors**: Authenticated ingestion for Google Drive (Strategy Docs) and GCS Buckets (Training Data).
+- [ ] **CRM Bridge**: Correlate technical roadmap shifts with field deal blockers in the CRM.
 
-### 📅 Phase 3: TPC Community Integration (Q2 2026)
-*Goal: Full integration with the TPC Community and Educators.*
+### 📅 Phase 3: Field Ecosystem Integration (Q2 2026)
+*Goal: Scaling the intelligence to the entire Google Cloud sales engine.*
 
-- [ ] **Event Calendar Sync**: Connect to `go/ai-sessions-cal` to broadcast upcoming seminars.
-- [ ] **Session Recording Summarization**: Use Gemini 1.5 Pro (long context) to ingest and summarize 60-minute seminar recordings.
-- [ ] **Learner analytics**: Track MAU and Query Volume to measure field upskilling success.
+- [ ] **Executive Dashboard**: A dedicated frontend (A2UI) for real-time competitive visualization.
+- [ ] **Session Summarization**: Use Gemini 1.5 Pro to ingest and summarize 2-hour competitor keynotes and research papers.
+- [ ] **Field Impact Analytics**: Track how Compete Pulse insights correlate with win rates and deal velocity.
 
 ---
 
 ## 🛠️ Infrastructure Gaps to Close
 1. **Authenticated Ingestion**: Shifting from public feed scraping to internal OAuth-based data retrieval.
-2. **Horizontal Scaling**: Transitioning from GitHub Actions (Batch) to Cloud Run (Service) architecture.
-3. **Multi-Model Routing**: Using Flash for pulses and Pro for deep semantic session summaries.
+2. **Horizontal Scaling**: Transitioning the Watcher from GitHub Actions to Cloud Run for real-time event-driven pulses.
+3. **Advanced Multimodality**: Using Gemini 1.5 Pro's 2M context window to compare competitor video demos against Google product reality.
+
+---
+
+*Generated & Maintained by the Compete Pulse Agent*
