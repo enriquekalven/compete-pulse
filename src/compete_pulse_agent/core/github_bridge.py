@@ -9,7 +9,7 @@ console = Console()
 
 class GitHubBridge:
     """
-    Bridge to post AI TPC reports as GitHub Issues.
+    Bridge to post Compete Pulse reports as GitHub Issues.
     This provides an automated notification channel without requiring email credentials.
     """
 
@@ -29,7 +29,7 @@ class GitHubBridge:
         if not knowledge:
             return
         date_suffix = f' ({date_range})' if date_range else ''
-        title = f'🚀 AI TPC Pulse: {len(knowledge)} New Updates{date_suffix}'
+        title = f'🚀 Compete Pulse Pulse: {len(knowledge)} New Updates{date_suffix}'
         body = self._format_markdown_report(knowledge, tldr, date_range, gaps)
         try:
             response = requests.post(self.api_url, headers={'Authorization': f'token {self.token}', 'Accept': 'application/vnd.github.v3+json'}, json={'title': title, 'body': body, 'labels': ['pulse', 'automated']}, timeout=15)
@@ -40,7 +40,7 @@ class GitHubBridge:
             raise e # Re-raise for retry
 
     def _format_markdown_report(self, knowledge: List[Dict[str, Any]], tldr: str=None, date_range: str=None, gaps: str=None) -> str:
-        report = '# 🚀 AI TPC Field Pulse\n'
+        report = '# 🚀 Compete Pulse Field Pulse\n'
         if date_range:
             report += f'**Pulse Period:** {date_range}\n\n'
         report += f"**Generated on:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} PST\n\n"
@@ -74,5 +74,5 @@ class GitHubBridge:
                 report += f"{item.get('summary', '')}\n\n"
                 report += f"**[🔗 Open Documentation]({item.get('source_url', '#')})**\n\n"
             report += '---\n'
-        report += '\n\n**Note:** This report is synthesized by the **AI TPC Agent** based on live documentation and release feeds.\n'
+        report += '\n\n**Note:** This report is synthesized by the **Compete Pulse Agent** based on live documentation and release feeds.\n'
         return report

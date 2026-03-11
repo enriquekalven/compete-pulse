@@ -13,7 +13,7 @@ graph TD
         PA[Partner Feeds: Anthropic/OpenAI]
     end
 
-    subgraph "AI TPC Intelligence Engine"
+    subgraph "Compete Pulse Intelligence Engine"
         W[Advanced Pulse Watcher]
         R[Pass 1: Strategic Impact Ranking /Gemini Flash/]
         A[Pass 2: Hybrid Synthesis /Gemini Pro + Flash/]
@@ -59,7 +59,7 @@ graph TD
 - **Enterprise Hardening**: Built-in PII scrubbing, exponential backoff, and prompt-injection validation.
 
 ## How it Works
-The AI TPC Agent follows a structured **Retrieve -> Synthesize -> Promote** lifecycle:
+The Compete Pulse Agent follows a structured **Retrieve -> Synthesize -> Promote** lifecycle:
 
 ### 1. Automated Retrieval (The "Watcher")
 The agent's **Watcher** engine wakes up (via GitHub Actions) and uses custom scrapers to scan:
@@ -92,28 +92,28 @@ pip install .
 ## Usage
 ### Local Report
 ```bash
-tpc-agent report
+compete-pulse report
 ```
 
 ### Google Chat Broadcast
 ```bash
-tpc-agent chat --webhook-url "YOUR_WEBHOOK_URL"
+compete-pulse chat --webhook-url "YOUR_WEBHOOK_URL"
 ```
 
 ### Email Promotion
 ```bash
-# Uses TPC_SENDER_EMAIL and TPC_SENDER_PASSWORD env vars
-tpc-agent email "ai-tpc-agent@google.com"
+# Uses COMPETE_PULSE_SENDER_EMAIL and COMPETE_PULSE_SENDER_PASSWORD env vars
+compete-pulse email "ai-compete-pulse@google.com"
 ```
 ### GitHub Issues Broadcast
 ```bash
 # Uses GITHUB_TOKEN and GITHUB_REPOSITORY env vars
-tpc-agent github
+compete-pulse github
 ```
 
 ## Sample Terminal Output
 ```text
-🚀 AI TPC AGENT: FIELD PROMOTION REPORT (Last 2 Days)
+🚀 Compete Pulse Agent: FIELD PROMOTION REPORT (Last 2 Days)
 
 🌉 ROADMAP BRIDGE: FIELD TALK TRACKS
 ╭─────────────────────────────────────────── [VERTEX-AI-RELEASES] ───────────────────────────────────────────╮
@@ -143,12 +143,12 @@ The repository includes a GitHub Action (`.github/workflows/pulse.yml`) to autom
 **Secure Channel Options:**
 1. **GitHub Issues (Default)**: Reports are posted as issues in the current repo. Zero-config (uses `GITHUB_TOKEN`).
 2. **Google Chat**: Add `GCHAT_WEBHOOK_URL` to GitHub Secrets.
-3. **Email**: Add `TPC_SENDER_EMAIL` and `TPC_SENDER_PASSWORD` (App Password) to GitHub Secrets.
+3. **Email**: Add `COMPETE_PULSE_SENDER_EMAIL` and `COMPETE_PULSE_SENDER_PASSWORD` (App Password) to GitHub Secrets.
 
 ## Alternative: Markdown Persistence
 If communication channels are restricted, you can run the agent to append to a local log:
 ```bash
-tpc-agent report >> FIELD_PILOT_LOG.md
+compete-pulse report >> FIELD_PILOT_LOG.md
 ```
 
 ## Intelligence Targets (Strategic Compete)

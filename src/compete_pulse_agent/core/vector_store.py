@@ -7,7 +7,7 @@ import vertexai
 from vertexai.preview import rag
 from vertexai.preview.rag import RagCorpus, RagFile
 
-class TPCVectorStore:
+class CompetePulseVectorStore:
     def __init__(self, project_id: str = "project-maui", location: str = "us-east1"):
         self.project_id = os.environ.get("GOOGLE_CLOUD_PROJECT", project_id)
         self.location = os.environ.get("GOOGLE_CLOUD_REGION", location)
@@ -15,7 +15,7 @@ class TPCVectorStore:
         
         try:
             vertexai.init(project=self.project_id, location=self.location)
-            self.corpus_display_name = "tpc_pulses_corpus"
+            self.corpus_display_name = "compete_pulses_corpus"
             self.corpus = self._get_or_create_corpus()
             self.enabled = True
         except Exception as e:
@@ -26,7 +26,7 @@ class TPCVectorStore:
             console.print("[yellow]Persistence and RAG features will be disabled for this session.[/yellow]")
 
     def _get_or_create_corpus(self) -> RagCorpus:
-        """Finds or creates the RagCorpus for TPC pulses."""
+        """Finds or creates the RagCorpus for CompetePulse pulses."""
         # Using list_corpora as seen in the SDK inspection
         existing_corpora = list(rag.list_corpora())
         for corpus in existing_corpora:
@@ -37,7 +37,7 @@ class TPCVectorStore:
         # Using create_corpus as seen in the SDK inspection
         return rag.create_corpus(
             display_name=self.corpus_display_name,
-            description="Historical TPC Pulse updates for RAG retrieval"
+            description="Historical Compete Pulse updates for RAG retrieval"
         )
 
     def upsert_pulses(self, pulses: List[Dict[str, Any]]):

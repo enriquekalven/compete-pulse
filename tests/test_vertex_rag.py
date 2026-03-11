@@ -6,7 +6,7 @@ from datetime import datetime
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
 try:
-    from ai_tpc_agent.core.vector_store import TPCVectorStore
+    from compete_pulse_agent.core.vector_store import CompetePulseVectorStore
     # Test if we can import the necessary bits
     import vertexai
     from vertexai.preview import rag
@@ -20,7 +20,7 @@ def verify_vertex_rag():
     
     try:
         # Initialize the vector store
-        store = TPCVectorStore(project_id=project_id)
+        store = CompetePulseVectorStore(project_id=project_id)
         print(f"✅ Connection established. Corpus Name: {store.corpus.name}")
         print(f"✅ Corpus Display Name: {store.corpus.display_name}")
 

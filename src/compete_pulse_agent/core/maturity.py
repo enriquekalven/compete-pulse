@@ -46,12 +46,12 @@ class MaturityAuditor:
 
     def _synthesize_maturity_wisdom(self, data: Dict[str, Any]) -> str:
         """
-        Synthesizes a TPC-grade maturity assessment using Gemini.
+        Synthesizes a CompetePulse-grade maturity assessment using Gemini.
         """
         prompt = f"""
         <system_instructions>
         You are a Principal AI Architect performing a Technical Maturity Audit on an SDK.
-        Your goal is to provide "Field Wisdom" for TPCs.
+        Your goal is to provide "Field Wisdom" for CompetePulses.
         </system_instructions>
         
         <context>

@@ -29,7 +29,7 @@ class GoogleChatBridge:
             sections = []
             for item in roadmap_items[:3]:
                 sections.append({'header': f"🗺️ {item['source'].upper()}: {item['title']}", 'widgets': [{'textParagraph': {'text': item.get('bridge', 'New tech detected.')}}, {'buttons': [{'textButton': {'text': 'OPEN DOCS', 'onClick': {'openLink': {'url': item.get('source_url', 'https://cloud.google.com/vertex-ai/docs/release-notes')}}}}]}]})
-            cards.append({'header': {'title': 'AI TPC AGENT: ROADMAP BRIDGE', 'subtitle': 'Actionable Field Intel', 'imageUrl': 'https://fonts.gstatic.com/s/i/short-term/release/googleg/bolt/default/24px.svg'}, 'sections': sections})
+            cards.append({'header': {'title': 'Compete Pulse AGENT: ROADMAP BRIDGE', 'subtitle': 'Actionable Field Intel', 'imageUrl': 'https://fonts.gstatic.com/s/i/short-term/release/googleg/bolt/default/24px.svg'}, 'sections': sections})
         trend_items = [k for k in knowledge if k['category'] != 'roadmap']
         if trend_items:
             trend_sections = []

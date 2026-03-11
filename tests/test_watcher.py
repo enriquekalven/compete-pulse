@@ -1,6 +1,6 @@
 from tenacity import retry, wait_exponential, stop_after_attempt
 import pytest
-from ai_tpc_agent.core.watcher import fetch_recent_updates, clean_version
+from compete_pulse_agent.core.watcher import fetch_recent_updates, clean_version
 from unittest.mock import MagicMock, patch
 
 def test_clean_version():

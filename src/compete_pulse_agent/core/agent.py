@@ -1,6 +1,6 @@
 import re
 from typing import Literal
-# AI TPC Agent - Version 0.1.0-Hardened
+# Compete Pulse Agent - Version 0.1.0-Hardened
 from tenacity import retry, wait_exponential, stop_after_attempt
 try:
     from google import adk
@@ -17,12 +17,12 @@ from rich.panel import Panel
 from rich.markdown import Markdown
 from .watcher import fetch_recent_updates
 from .pii_scrubber import scrub_pii
-from .vector_store import TPCVectorStore
+from .vector_store import CompetePulseVectorStore
 from .maturity import MaturityAuditor
 console = Console()
 WATCHLIST_PATH = os.path.join(os.path.dirname(__file__), 'watchlist.json')
 
-class TPCTools:
+class CompetePulseTools:
 
     def browse_ai_knowledge(self) -> List[Dict[str, Any]]:
         """
@@ -119,13 +119,13 @@ def parse_date(date_str: str) -> datetime:
         except:
             return datetime.now(timezone.utc) - timedelta(days=365)
 
-class TPCAgent:
+class CompetePulseAgent:
     """
     Wrapper to maintain compatibility with existing CLI commands.
     """
 
     def __init__(self, conversation_id: str='default-session', project_id: str = "project-maui"):
-        self.tools = TPCTools()
+        self.tools = CompetePulseTools()
         self.api_key = os.environ.get('GOOGLE_API_KEY')
         self.project_id = os.environ.get("GOOGLE_CLOUD_PROJECT", project_id)
         self.conversation_id = conversation_id
@@ -143,7 +143,7 @@ class TPCAgent:
             self.cache_config = ContextCacheConfig(ttl_seconds=3600)
         
         # RAG Support: Initialize Vector Store
-        self.vector_store = TPCVectorStore(project_id=self.project_id)
+        self.vector_store = CompetePulseVectorStore(project_id=self.project_id)
 
     def browse_knowledge(self) -> List[Dict[str, Any]]:
         return self.tools.browse_ai_knowledge()
@@ -221,7 +221,7 @@ class TPCAgent:
         
         image_prompt = f"""
         A professional, cinematic enterprise technology dashboard. 
-        Main Heading: 'AI TPC FIELD PULSE'.
+        Main Heading: 'Compete Pulse FIELD PULSE'.
         Sub-elements visualizing these topics: {', '.join(titles)}.
         Style: Cybernetic, minimalist, Google Cloud blue and indigo palette. 
         Format: Data visualization nodes, clean strategic radar, high contrast.
@@ -460,7 +460,7 @@ class TPCAgent:
     def promote_learnings(self, synthesized_content: Dict[str, Any], days: int=1):
         items = synthesized_content.get('items', [])
         tldr = synthesized_content.get('tldr', '')
-        console.print(Panel.fit(f'🚀 [bold green]AI TPC AGENT: FIELD PROMOTION REPORT (Last {days} Days)[/bold green]', border_style='green'))
+        console.print(Panel.fit(f'🚀 [bold green]Compete Pulse AGENT: FIELD PROMOTION REPORT (Last {days} Days)[/bold green]', border_style='green'))
         if tldr:
             console.print(Panel(tldr, title='🎯 Executive TLDR', border_style='yellow'))
         now = datetime.now(timezone.utc)
@@ -491,7 +491,7 @@ class TPCAgent:
             prompt = f"""
             <system_instructions>
             <identity>
-            You are a Technical Program Consultant (TPC) for Google Cloud AI.
+            You are a Technical Program Consultant (CompetePulse) for Google Cloud AI.
             </identity>
             
             <constraints>

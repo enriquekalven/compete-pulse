@@ -2,7 +2,7 @@ from typing import Literal
 from unittest.mock import MagicMock, patch
 import pytest
 import os
-from ai_tpc_agent.core.vector_store import TPCVectorStore
+from compete_pulse_agent.core.vector_store import CompetePulseVectorStore
 
 @patch('vertexai.init')
 @patch('vertexai.preview.rag.list_corpora')
@@ -10,11 +10,11 @@ from ai_tpc_agent.core.vector_store import TPCVectorStore
 def test_vector_store_initialization(mock_create, mock_list, mock_init):
     # Mock existing corpus
     mock_corpus = MagicMock()
-    mock_corpus.display_name = "tpc_pulses_corpus"
+    mock_corpus.display_name = "compete_pulses_corpus"
     mock_corpus.name = "projects/p/locations/l/ragCorpora/c1"
     mock_list.return_value = [mock_corpus]
     
-    store = TPCVectorStore(project_id="test-project")
+    store = CompetePulseVectorStore(project_id="test-project")
     
     assert mock_init.called
     assert store.corpus.name == "projects/p/locations/l/ragCorpora/c1"
@@ -25,10 +25,10 @@ def test_vector_store_initialization(mock_create, mock_list, mock_init):
 @patch('vertexai.preview.rag.upload_file')
 def test_upsert_pulses(mock_upload, mock_list, mock_init):
     mock_corpus = MagicMock()
-    mock_corpus.display_name = "tpc_pulses_corpus"
+    mock_corpus.display_name = "compete_pulses_corpus"
     mock_list.return_value = [mock_corpus]
     
-    store = TPCVectorStore()
+    store = CompetePulseVectorStore()
     test_pulse = {
         "title": "Test Pulse",
         "source": "src",
@@ -44,7 +44,7 @@ def test_upsert_pulses(mock_upload, mock_list, mock_init):
 @patch('vertexai.preview.rag.retrieval_query')
 def test_query(mock_retrieval, mock_list, mock_init):
     mock_corpus = MagicMock()
-    mock_corpus.display_name = "tpc_pulses_corpus"
+    mock_corpus.display_name = "compete_pulses_corpus"
     mock_list.return_value = [mock_corpus]
     
     # Mock response
@@ -55,7 +55,7 @@ def test_query(mock_retrieval, mock_list, mock_init):
     mock_resp.contexts.contexts = [mock_context]
     mock_retrieval.return_value = mock_resp
     
-    store = TPCVectorStore()
+    store = CompetePulseVectorStore()
     results = store.query("test query")
     
     assert len(results) == 1
@@ -66,10 +66,10 @@ def test_query(mock_retrieval, mock_list, mock_init):
 @patch('vertexai.preview.rag.import_files')
 def test_ingest_uris(mock_import, mock_list, mock_init):
     mock_corpus = MagicMock()
-    mock_corpus.display_name = "tpc_pulses_corpus"
+    mock_corpus.display_name = "compete_pulses_corpus"
     mock_list.return_value = [mock_corpus]
     
-    store = TPCVectorStore()
+    store = CompetePulseVectorStore()
     uris = ["https://drive.google.com/open?id=123"]
     store.ingest_uris(uris)
     

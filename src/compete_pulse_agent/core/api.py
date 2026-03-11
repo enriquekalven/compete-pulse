@@ -1,13 +1,13 @@
 from fastapi import FastAPI, Query
 from typing import List, Dict, Any, Optional
-from .agent import TPCAgent
+from .agent import CompetePulseAgent
 
-app = FastAPI(title="AI TPC Agent API", version="0.1.0-RAG")
-agent = TPCAgent()
+app = FastAPI(title="Compete Pulse Agent API", version="0.1.0-RAG")
+agent = CompetePulseAgent()
 
 @app.get("/")
 def read_root():
-    return {"message": "AI TPC Agent API is active", "status": "healthy"}
+    return {"message": "Compete Pulse Agent API is active", "status": "healthy"}
 
 @app.get("/query")
 def query_agent(q: str = Query(..., description="The search query for the AI knowledge base")):

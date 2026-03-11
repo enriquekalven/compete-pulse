@@ -14,13 +14,13 @@ console = Console()
 
 class EmailBridge:
     """
-    Bridge to send AI TPC reports via Email.
+    Bridge to send Compete Pulse reports via Email.
     """
 
     def __init__(self, recipient: str, sender_email: str=None, sender_password: str=None, smtp_server: str='smtp.gmail.com', smtp_port: int=587):
         self.recipient = recipient
-        self.sender_email = sender_email or os.environ.get('TPC_SENDER_EMAIL')
-        self.sender_password = sender_password or os.environ.get('TPC_SENDER_PASSWORD')
+        self.sender_email = sender_email or os.environ.get('CompetePulse_SENDER_EMAIL')
+        self.sender_password = sender_password or os.environ.get('CompetePulse_SENDER_PASSWORD')
         self.smtp_server = smtp_server
         self.smtp_port = smtp_port
         self.context_cache = None
@@ -33,15 +33,15 @@ class EmailBridge:
         Formats and sends the report via Email.
         """
         if not self.sender_email or not self.sender_password:
-            console.print('[red]Error: Email credentials (TPC_SENDER_EMAIL/TPC_SENDER_PASSWORD) not set.[/red]')
+            console.print('[red]Error: Email credentials (CompetePulse_SENDER_EMAIL/CompetePulse_SENDER_PASSWORD) not set.[/red]')
             return
         if not knowledge:
             return
         try:
             msg = MIMEMultipart()
-            msg['From'] = f'AI TPC Agent <{self.sender_email}>'
+            msg['From'] = f'Compete Pulse Agent <{self.sender_email}>'
             msg['To'] = self.recipient
-            subject = f'📡 AI TPC Pulse: {len(knowledge)} New Technical Updates'
+            subject = f'📡 Compete Pulse Pulse: {len(knowledge)} New Technical Updates'
             if date_range:
                 subject += f' ({date_range})'
             msg['Subject'] = subject
@@ -262,7 +262,7 @@ class EmailBridge:
         <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>AI TPC Field Pulse</title>
+            <title>Compete Pulse Field Pulse</title>
             <style>
                 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
                 body {{ font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f1f5f9; color: #334155; }}
@@ -275,7 +275,7 @@ class EmailBridge:
                         <span style="background-color: #6366f1; color: white; padding: 4px 12px; border-radius: 6px; font-weight: 800; font-size: 12px; letter-spacing: 0.1em;">FIELD PROMOTION</span>
                         <span style="color: #94a3b8; font-size: 12px; font-weight: 600; margin-left: auto;">{date_range}</span>
                     </div>
-                    <h1 style="color: #ffffff; font-size: 2.5rem; font-weight: 800; margin: 0; letter-spacing: -0.02em;">AI TPC Pulse</h1>
+                    <h1 style="color: #ffffff; font-size: 2.5rem; font-weight: 800; margin: 0; letter-spacing: -0.02em;">Compete Pulse Pulse</h1>
                     <p style="color: #c7d2fe; font-size: 1.1rem; margin: 12px 0 0 0; font-weight: 500; opacity: 0.9;">Technical Roadmap Intel for Field Architects</p>
                 </header>
 
@@ -298,7 +298,7 @@ class EmailBridge:
                     <div style="margin-bottom: 24px;">
                         <span style="font-size: 24px;">🚀</span>
                     </div>
-                    <p style="margin: 0; color: #64748b; font-size: 0.9rem; font-weight: 600;">Synthesized by AI TPC Agent v0.1.2</p>
+                    <p style="margin: 0; color: #64748b; font-size: 0.9rem; font-weight: 600;">Synthesized by Compete Pulse Agent v0.1.2</p>
                     <p style="margin: 4px 0 24px 0; color: #94a3b8; font-size: 0.8rem; font-weight: 500;">Powered by **Gemini 2.5 Pro & Flash** Hybrid Engine</p>
                     
                     <div style="background-color: #fff1f2; color: #e11d48; padding: 12px 24px; border-radius: 8px; display: inline-block; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; border: 1px solid #fecaca;">

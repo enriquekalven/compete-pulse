@@ -2,18 +2,18 @@ from tenacity import retry, wait_exponential, stop_after_attempt
 import typer
 import os
 from typing import Optional, List
-from .core.agent import TPCAgent
+from .core.agent import CompetePulseAgent
 from .core.chat_bridge import GoogleChatBridge
 from .core.email_bridge import EmailBridge
 from .core.github_bridge import GitHubBridge
-app = typer.Typer(help='AI TPC Agent: Browsing and Promoting AI Knowledge')
+app = typer.Typer(help='Compete Pulse Agent: Browsing and Promoting AI Knowledge')
 
 @app.command()
 def report(days: int=typer.Option(1, '--days', '-d', help='Number of days to look back'), 
            project: str = typer.Option("project-maui", "--project", help="GCP Project ID"),
            infographic: bool = typer.Option(False, "--infographic", help="Generate a visual pulse infographic")):
     """Generate the AI Field Promotion Report locally."""
-    agent = TPCAgent(project_id=project)
+    agent = CompetePulseAgent(project_id=project)
     knowledge = agent.browse_knowledge()
     from .core.agent import parse_date
     from datetime import datetime, timedelta, timezone
@@ -33,7 +33,7 @@ def chat(webhook_url: str=typer.Option(None, '--webhook-url', envvar='GCHAT_WEBH
     if not webhook_url:
         typer.echo('Error: Webhook URL must be provided via --webhook-url or GCHAT_WEBHOOK_URL env var.')
         raise typer.Exit(code=1)
-    agent = TPCAgent(project_id=project)
+    agent = CompetePulseAgent(project_id=project)
     knowledge = agent.browse_knowledge()
     from .core.agent import parse_date
     from datetime import datetime, timedelta, timezone
@@ -46,13 +46,13 @@ def chat(webhook_url: str=typer.Option(None, '--webhook-url', envvar='GCHAT_WEBH
 
 @app.command()
 def email(recipient: str=typer.Argument(..., help='Recipient email address'), 
-          sender: str=typer.Option(None, '--sender', envvar='TPC_SENDER_EMAIL', help='Sender email address'), 
-          password: str=typer.Option(None, '--password', envvar='TPC_SENDER_PASSWORD', help='Sender email password/token'), 
+          sender: str=typer.Option(None, '--sender', envvar='CompetePulse_SENDER_EMAIL', help='Sender email address'), 
+          password: str=typer.Option(None, '--password', envvar='CompetePulse_SENDER_PASSWORD', help='Sender email password/token'), 
           days: int=typer.Option(1, '--days', '-d', help='Number of days to look back'), 
           project: str = typer.Option("project-maui", "--project", help="GCP Project ID"),
           infographic: bool = typer.Option(False, "--infographic", help="Generate and embed a visual pulse infographic")):
     """Scan and send the report via Email."""
-    agent = TPCAgent(project_id=project)
+    agent = CompetePulseAgent(project_id=project)
     knowledge = agent.browse_knowledge()
     from .core.agent import parse_date
     from datetime import datetime, timedelta, timezone
@@ -74,7 +74,7 @@ def email(recipient: str=typer.Argument(..., help='Recipient email address'),
 @app.command()
 def github(days: int=typer.Option(1, '--days', '-d', help='Number of days to look back'), project: str = typer.Option("project-maui", "--project", help="GCP Project ID")):
     """Dispatch the AI Field Promotion Report as a GitHub Issue."""
-    agent = TPCAgent(project_id=project)
+    agent = CompetePulseAgent(project_id=project)
     knowledge = agent.browse_knowledge()
     from .core.agent import parse_date
     from datetime import datetime, timedelta, timezone
@@ -91,7 +91,7 @@ def github(days: int=typer.Option(1, '--days', '-d', help='Number of days to loo
 @app.command()
 def query(text: str = typer.Argument(..., help="Text to search for in the knowledge base"), project: str = typer.Option("project-maui", "--project", help="GCP Project ID")):
     """Query the persistent knowledge base (RAG)."""
-    agent = TPCAgent(project_id=project)
+    agent = CompetePulseAgent(project_id=project)
     results = agent.query_knowledge(text)
     if not results:
         typer.echo("No relevant pulses found.")
@@ -115,31 +115,31 @@ def query(text: str = typer.Argument(..., help="Text to search for in the knowle
 def serve(host: str = "0.0.0.0", port: int = 8000):
     """Launch the AI Agent FastAPI service."""
     import uvicorn
-    typer.echo(f"🚀 Starting AI TPC Agent API on {host}:{port}")
-    uvicorn.run("ai_tpc_agent.core.api:app", host=host, port=port, reload=True)
+    typer.echo(f"🚀 Starting Compete Pulse Agent API on {host}:{port}")
+    uvicorn.run("compete_pulse_agent.core.api:app", host=host, port=port, reload=True)
 
 @app.command()
 def ingest(uris: List[str] = typer.Argument(..., help="List of Google Drive URLs or GCS URIs to ingest"), project: str = typer.Option("project-maui", "--project", help="GCP Project ID")):
     """Ingest Workspace documents (Slides, Docs, Sheets) link by link or folder by folder."""
-    agent = TPCAgent(project_id=project)
+    agent = CompetePulseAgent(project_id=project)
     agent.ingest_documents(uris)
     typer.echo(f"🚀 Ingestion request submitted for {len(uris)} sources. Documents are being processed by Vertex AI RAG Engine.")
 
 @app.command()
 def audit_maturity(package: str = typer.Argument(..., help="PyPI package name to audit"), project: str = typer.Option("project-maui", "--project", help="GCP Project ID")):
     """Perform a deep audit of a package's history and maturity (Initial Deep Ingestion)."""
-    agent = TPCAgent(project_id=project)
+    agent = CompetePulseAgent(project_id=project)
     wisdom = agent.audit_maturity(package)
     if "wisdom" in wisdom:
         from rich.console import Console
         from rich.panel import Panel
         from rich.markdown import Markdown
         console = Console()
-        console.print(Panel(Markdown(wisdom["wisdom"]), title=f"🧠 TPC WISDOM: {package}", border_style="magenta"))
+        console.print(Panel(Markdown(wisdom["wisdom"]), title=f"🧠 CompetePulse WISDOM: {package}", border_style="magenta"))
 
 @app.command()
 def version():
     """Show version."""
-    typer.echo('AI TPC Agent v0.1.0 (ADK Powered)')
+    typer.echo('Compete Pulse Agent v0.1.0 (ADK Powered)')
 if __name__ == '__main__':
     app()
