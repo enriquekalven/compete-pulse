@@ -13,15 +13,28 @@ def clean_version(v_str: str) -> str:
     return v_str.strip().lstrip('v')
 
 def parse_html_date(date_str: str) -> Optional[datetime]:
-    """Parses dates like 'February 06, 2026' or 'Feb 06, 2026'."""
-    formats = ["%B %d, %Y", "%b %d, %Y"]
-    clean_date = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', date_str).strip()
-    for fmt in formats:
-        try:
-            return datetime.strptime(clean_date, fmt).replace(tzinfo=timezone.utc)
-        except Exception:
-            continue
-    return None
+    """Parses dates like 'February 06, 2026', 'Feb 06, 2026', or ranges like 'Mar 2 - Mar 6'."""
+    # Handle ranges: take the end of the range
+    if ' - ' in date_str:
+        date_str = date_str.split(' - ')[-1]
+    
+    # Common month names
+    months = r'(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*'
+    
+    # Try to extract month, day, and optional year
+    match = re.search(f'({months})\\s+(\\d{{1,2}})(?:,\\s+(\\d{{4}}))?', date_str, re.IGNORECASE)
+    if not match:
+        return None
+    
+    month_name = match.group(1)[:3].title()
+    day = match.group(3)
+    year = match.group(4) or str(datetime.now().year)
+    
+    try:
+        dt_str = f"{month_name} {day}, {year}"
+        return datetime.strptime(dt_str, "%b %d, %Y").replace(tzinfo=timezone.utc)
+    except Exception:
+        return None
 
 @retry(wait=wait_exponential(multiplier=1, min=2, max=10), stop=stop_after_attempt(3))
 def fetch_recent_updates(url: str, max_items: int = 5) -> List[Dict[str, str]]:
@@ -112,57 +125,54 @@ def _fetch_from_html(url: str, max_items: int = 5) -> List[Dict[str, str]]:
         with urllib.request.urlopen(req, timeout=15) as response:
             content = response.read().decode('utf-8')
             
-            # Identify date headers or meta dates
-            date_pattern = r'([A-Z][a-z]+\s+\d{1,2},\s+\d{4})'
+            # Improved pattern to catch 'Mar 2 - Mar 6' or 'March 15, 2026'
+            date_pattern = r'([A-Z][a-z]+\s+\d{1,2}(?:\s*-\s*[A-Z][a-z]+\s+\d{1,2})?(?:,\s+\d{4})?)'
             
-            # SIGNAL DETECTION PASS: Look for high-value product launches even if structural parsing fails
-            high_value_signals = ['Gemini 3.1', 'Gemini 3', 'Claude 3.5 Sonnet', 'Vertex AI Agent Builder']
-            for signal in high_value_signals:
-                if signal.lower() in content.lower() and not any(signal.lower() in u['title'].lower() for u in updates):
-                    # Try to extract a title from around the signal
-                    signal_match = re.search(f'[^.>?!"\']*{re.escape(signal)}[^.>?!"\']*', content, re.IGNORECASE)
-                    if signal_match:
-                        updates.append({
-                            'title': signal_match.group(0).strip()[:100],
-                            'date': datetime.now(timezone.utc).isoformat(),
-                            'summary': f"Significant roadmap signal detected: {signal}. Analysis suggests high field impact.",
-                            'source_url': url,
-                            'version': "Signal detected"
-                        })
-
-            # Standard heuristic for other articles
+            # Extract dates and their positions
             all_dates = []
             for m in re.finditer(date_pattern, content):
                 date_str = m.group(1)
                 dt = parse_html_date(date_str)
-                if dt: all_dates.append((dt, m.start()))
+                if dt: 
+                    all_dates.append((dt, m.start(), m.end()))
             
-            for dt, pos in all_dates:
-                # Look for a title nearby (usually before the date in modern HTML search/lists)
-                nearby_content = content[max(0, pos-1000):pos+500]
-                possible_titles = re.findall(r'<a[^>]*>(.*?)</a>', nearby_content, flags=re.DOTALL)
-                if possible_titles:
-                    title = re.sub(r'<[^>]+>', '', possible_titles[-1]).strip()
-                else:
-                    # Fallback: find first non-empty line after date in text
-                    block = content[pos:pos+500]
-                    clean_block = re.sub(r'<[^>]+>', '\n', block)
-                    lines = [l.strip() for l in clean_block.split('\n') if l.strip()]
-                    # Skip the date itself if it caught it
-                    if lines and any(x in lines[0] for x in ['February', 'January', 'March']): # crude date check
-                        lines = lines[1:]
-                    title = lines[0] if lines else "Update"
+            all_dates.sort(key=lambda x: x[1])
 
-                if len(title) > 10 and title not in [u['title'] for u in updates]:
-                    updates.append({
-                        'title': title,
-                        'date': dt.isoformat(),
-                        'summary': "Strategic update found on industry pulse feed.",
-                        'source_url': url,
-                        'version': "N/A"
-                    })
-                if len(updates) >= max_items: break
-        return updates
+            for i, (dt, start_pos, end_pos) in enumerate(all_dates):
+                # The content for this date is between this date and the next date
+                next_pos = all_dates[i+1][1] if i + 1 < len(all_dates) else len(content)
+                section_content = content[end_pos:next_pos]
+                
+                # Split section into potential update fragments
+                fragments = re.split(r'<(?:h\d|li|p|div)[^>]*>', section_content)
+                for frag in fragments:
+                    clean_frag = re.sub(r'<[^>]+>', ' ', frag).strip()
+                    if len(clean_frag) < 30: continue
+                    
+                    # Extract title
+                    link_match = re.search(r'<a[^>]*>(.*?)</a>', frag, flags=re.DOTALL)
+                    if link_match:
+                        title = re.sub(r'<[^>]+>', ' ', link_match.group(1)).strip()
+                    else:
+                        title = clean_frag.split('\n')[0].strip()
+                    
+                    if len(title) > 10 and title not in [u['title'] for u in updates]:
+                        summary = clean_frag[len(title):].strip()[:500]
+                        if not summary: summary = clean_frag[:500]
+                        
+                        updates.append({
+                            'title': title,
+                            'date': dt.isoformat(),
+                            'summary': summary,
+                            'source_url': url,
+                            'version': "N/A"
+                        })
+                    
+                    if len(updates) >= max_items * 3: break
+                if len(updates) >= max_items * 3: break
+        
+        updates.sort(key=lambda x: x['date'], reverse=True)
+        return updates[:max_items]
     except Exception:
         return []
 
