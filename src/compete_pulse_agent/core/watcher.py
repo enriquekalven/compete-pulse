@@ -143,22 +143,25 @@ def _fetch_from_html(url: str, max_items: int = 5) -> List[Dict[str, str]]:
                 next_pos = all_dates[i+1][1] if i + 1 < len(all_dates) else len(content)
                 section_content = content[end_pos:next_pos]
                 
-                # Split section into potential update fragments
-                fragments = re.split(r'<(?:h\d|li|p|div)[^>]*>', section_content)
+                # Split section into potential update fragments (e.g. by bullet points or headers)
+                # We try to keep paragraphs together if they belong to the same update
+                fragments = re.split(r'<(?:h\d|li)[^>]*>', section_content)
                 for frag in fragments:
                     clean_frag = re.sub(r'<[^>]+>', ' ', frag).strip()
-                    if len(clean_frag) < 30: continue
+                    if len(clean_frag) < 20: continue
                     
-                    # Extract title
+                    # Extract title: first link text or first line
                     link_match = re.search(r'<a[^>]*>(.*?)</a>', frag, flags=re.DOTALL)
                     if link_match:
                         title = re.sub(r'<[^>]+>', ' ', link_match.group(1)).strip()
+                        summary = clean_frag.replace(title, '', 1).strip()[:500]
                     else:
-                        title = clean_frag.split('\n')[0].strip()
+                        lines = [l.strip() for l in clean_frag.split('\n') if l.strip()]
+                        title = lines[0] if lines else "Update"
+                        summary = "\n".join(lines[1:])[:500]
                     
                     if len(title) > 10 and title not in [u['title'] for u in updates]:
-                        summary = clean_frag[len(title):].strip()[:500]
-                        if not summary: summary = clean_frag[:500]
+                        if not summary: summary = "Strategic update found on industry pulse feed."
                         
                         updates.append({
                             'title': title,
