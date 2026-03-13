@@ -2,7 +2,7 @@
 
 [![Compete Pulse Actions](https://github.com/enriquekalven/compete-pulse/actions/workflows/pulse.yml/badge.svg)](https://github.com/enriquekalven/compete-pulse/actions)
 [![Standard: Vertex AI ADK](https://img.shields.io/badge/Standard-Vertex%20AI%20ADK-blue)](https://github.com/google/adk-python)
-[![Intelligence: Gemini 3.1 Pro](https://img.shields.io/badge/Intelligence-Gemini%203.1%20Pro-purple)](https://cloud.google.com/vertex-ai)
+[![Intelligence: Gemini 2.5 Pro](https://img.shields.io/badge/Intelligence-Gemini%202.5%20Pro-purple)](https://cloud.google.com/vertex-ai)
 
 **Compete Pulse** is a high-fidelity intelligence engine designed to track, analyze, and neutralize competitor AI "Launch Theater." It bridges the gap between raw technical updates (LLM benchmarks, SDK releases) and **Enterprise-Ready Sales Plays** for Google Cloud field teams.
 
@@ -18,10 +18,10 @@ graph TD
         C3[Market Trends: SiliconAngle/SemiAnalysis]
     end
 
-    subgraph "Compete Pulse Brain (Gemini 3.1 Hub)"
+    subgraph "Compete Pulse Brain (Gemini 2.5 Hub)"
         W[Watcher: Feed Ingestion]
-        R[Ranker: Impact Scoring /3.1 Flash Lite/]
-        S[Scribe: Hybrid Synthesis /3.1 Pro/]
+        R[Ranker: Impact Scoring /2.5 Flash/]
+        S[Scribe: Hybrid Synthesis /2.5 Pro/]
         GA[Gap Analyst: Strategic Battlecards]
         
         W --> R
@@ -63,10 +63,10 @@ graph TD
 The **Watcher** scans official release feeds (Vertex AI, Anthropic, OpenAI) and code movements (ADK, A2UI, Genkit) every 24-48 hours.
 
 ### 2. Impact Ranking (Flash Engine)
-Uses **Gemini 3.1 Flash Lite** to assign a **Strategic Impact Score (1-100)**. This ensures major launches like Gemini 3.1 or Sovereign AI updates are prioritized over minor SDK patches.
+Uses **Gemini 2.5 Flash** to assign a **Strategic Impact Score (1-100)**. This ensures major launches like Gemini 2.5 or Sovereign AI updates are prioritized over minor SDK patches.
 
 ### 3. Executive Synthesis (Pro Engine)
-Uses **Gemini 3.1 Pro** to distill technical changes into three actionable talk tracks:
+Uses **Gemini 2.5 Pro** to distill technical changes into three actionable talk tracks:
 *   **Key Feature**: The technical "What."
 *   **Customer Value**: The business "Why."
 *   **Compete Play**: The tactical "How" to win against the rival solution.
@@ -103,6 +103,14 @@ compete-pulse email "field-team@google.com" --infographic
 compete-pulse query "How did we respond to Claude 3.5 Sonnet launch?"
 ```
 
+### Rapid Response Battlecard
+```bash
+# Generate a high-fidelity 'Rapid Response' battlecard for a competitor product
+compete-pulse response "Claude CoWork"
+```
+
+**GitHub Action Trigger**: You can also trigger this analysis on-demand via the **Actions** tab in GitHub using the "Competitive Rapid Response" workflow.
+
 ---
 
 ## 🔐 Environment Configuration
@@ -110,7 +118,7 @@ To run the agent locally or in CI/CD, configure the following:
 
 | Variable | Description |
 | :--- | :--- |
-| `GOOGLE_API_KEY` | API Key for Gemini 3.1 Flash Lite/Pro access. |
+| `GOOGLE_API_KEY` | API Key for Gemini 2.5 Flash/Pro access. |
 | `COMPETE_PULSE_SENDER_EMAIL` | Sender address for automated pulses. |
 | `COMPETE_PULSE_SENDER_PASSWORD` | Google **App Password** for secure delivery. |
 | `GCHAT_WEBHOOK_URL` | Webhook for real-time corridor alerts. |

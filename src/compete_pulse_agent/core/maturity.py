@@ -74,7 +74,7 @@ class MaturityAuditor:
         </format>
         """
         try:
-            resp = self.gemini_client.models.generate_content(model='gemini-3.1-flash-lite', contents=prompt)
+            resp = self.gemini_client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
             return resp.text.strip()
         except Exception:
             return "Unable to synthesize wisdom at this time."

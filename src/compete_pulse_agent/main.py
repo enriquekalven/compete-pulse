@@ -138,6 +138,22 @@ def audit_maturity(package: str = typer.Argument(..., help="PyPI package name to
         console.print(Panel(Markdown(wisdom["wisdom"]), title=f"🧠 CompetePulse WISDOM: {package}", border_style="magenta"))
 
 @app.command()
+def response(competitor_product: str = typer.Argument(..., help="Competitor product name to analyze (e.g. 'Claude CoWork')"), 
+             project: str = typer.Option("project-maui", "--project", help="GCP Project ID"),
+             raw: bool = typer.Option(False, "--raw", help="Output raw markdown instead of rich rendered text")):
+    """Generate a 'Rapid Response' battlecard for a specific competitor product."""
+    agent = CompetePulseAgent(project_id=project)
+    response_markdown = agent.generate_rapid_response(competitor_product)
+    
+    if raw:
+        print(response_markdown)
+    else:
+        from rich.console import Console
+        from rich.markdown import Markdown
+        console = Console()
+        console.print(Markdown(response_markdown))
+
+@app.command()
 def version():
     """Show version."""
     typer.echo('Compete Pulse Agent v0.1.0 (ADK Powered)')

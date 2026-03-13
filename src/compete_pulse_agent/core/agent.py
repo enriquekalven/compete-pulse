@@ -279,7 +279,7 @@ class CompetePulseAgent:
             if len(item.get('summary', '')) < 50:
                 try:
                     gen_prompt = f"Based on the title '{item['title']}' from source '{item['source']}', provide a 2-sentence technical summary of what this update likely entails for an AI Engineer. Return ONLY the summary."
-                    gen_resp = self.client.models.generate_content(model='gemini-3.1-flash-lite', contents=gen_prompt)
+                    gen_resp = self.client.models.generate_content(model='gemini-2.5-flash', contents=gen_prompt)
                     item['summary'] = gen_resp.text.strip()
                 except Exception:
                     pass
@@ -288,14 +288,14 @@ class CompetePulseAgent:
             item['bridge'] = self._scrub_pii(item['bridge'])
             try:
                 tag_prompt = f"Categorize this technical update with 1-2 keywords (e.g. Governance, Security, UX, Performance, Scalability). Update: {item['title']}. Return only keywords separated by commas."
-                tag_resp = self.client.models.generate_content(model='gemini-3.1-flash-lite', contents=tag_prompt)
+                tag_resp = self.client.models.generate_content(model='gemini-2.5-flash', contents=tag_prompt)
                 item['tags'] = [t.strip() for t in tag_resp.text.split(',')]
             except Exception:
                 item['tags'] = []
             if len(item.get('summary', '')) > 200:
                 try:
                     refine_prompt = f"Summarize this for a technical business audience into 3 distinct markdown bullet points. Focus on 'Key Feature', 'Customer Value', and 'Sales Play'. Use bold labels for each. Content: {item['summary']}"
-                    resp = self.client.models.generate_content(model='gemini-3.1-flash-lite', contents=refine_prompt)
+                    resp = self.client.models.generate_content(model='gemini-2.5-flash', contents=refine_prompt)
                     item['summary'] = resp.text.strip()
                 except Exception:
                     pass
@@ -316,18 +316,12 @@ class CompetePulseAgent:
                 </context>
                 
                 <task>
-<<<<<<< Updated upstream
-                Provide a high-level 'Executive Synthesis' (2-3 sentences) summarizing the collective theme of these updates.
-                If there are multiple sources (e.g. Google, Anthropic, OpenAI), highlight the 'Ecosystem Synergy' or competitive shifts.
-                Focus on the actionable impact for field architects. Use professional, high-signal language with 2-3 relevant emojis.
-                Avoid generic boilerplate. Make it feel fresh and specific to these titles.
-=======
-                Provide a high-level 'Executive Synthesis' summarizing the theme of these recent AI updates.
+                Provide a high-level 'Executive Synthesis' (2-3 sentences) summarizing the collective theme of these recent AI updates.
                 - If there are competitive updates or benchmark shifts, include a 'Competitive & Performance Pulse' section.
                 - Clearly articulate 'How Google Responds' or what Google's unique advantage is in this context.
                 - Focus on "Quality of Service" and "Production Reliability" over "Raw Leaderboard Rank".
-                - Use professional but engaging language with 2-3 relevant emojis.
->>>>>>> Stashed changes
+                - Use professional, high-signal language with 2-3 relevant emojis.
+                - Avoid generic boilerplate. Make it feel fresh and specific to these titles.
                 </task>
 
                 <constraints>
@@ -337,7 +331,7 @@ class CompetePulseAgent:
                 - Keep it strictly professional and business-focused.
                 </constraints>
                 """
-                resp = self.client.models.generate_content(model='gemini-3.1-pro', contents=tldr_prompt)
+                resp = self.client.models.generate_content(model='gemini-2.5-pro', contents=tldr_prompt)
                 tldr = resp.text.strip()
             except Exception:
                 pass
@@ -394,7 +388,7 @@ class CompetePulseAgent:
         </constraints>
         """
         
-        resp = self.client.models.generate_content(model='gemini-3.1-pro', contents=prompt)
+        resp = self.client.models.generate_content(model='gemini-2.5-pro', contents=prompt)
         return resp.text.strip()
 
     def _rank_by_impact(self, items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -426,7 +420,7 @@ class CompetePulseAgent:
         
         try:
             # Clean up potential markdown formatting if Gemini returns it
-            resp = self.client.models.generate_content(model='gemini-3.1-flash-lite', contents=prompt)
+            resp = self.client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
             clean_json = resp.text.strip().replace('```json', '').replace('```', '')
             # Remove any trailing commas or malformed bits Gemini might add
             clean_json = re.sub(r',\s*]', ']', clean_json)
@@ -441,7 +435,7 @@ class CompetePulseAgent:
                     if 0 <= idx < len(items):
                         # Force Gemini 3.1 to be top score always
                         title = items[idx].get('title', '').lower()
-                        if 'gemini 3' in title or 'gemini 3.1' in title:
+                        if 'gemini 2.5' in title or 'gemini 2' in title:
                             score = max(score, 98)
                         items[idx]['impact_score'] = score
                 except (ValueError, TypeError):
@@ -456,6 +450,112 @@ class CompetePulseAgent:
             console.print(f"[yellow]Ranking parse failed: {e}. Falling back to default order.[/yellow]")
             for i in items: i['impact_score'] = 0
             return items[:20]
+
+    def generate_rapid_response(self, competitor_product: str) -> str:
+        """
+        Generates a 'Rapid Response' battlecard for a specific competitor product using a standardized template.
+        """
+        if not self.client:
+            return "Error: Gemini client not initialized. Cannot generate rapid response."
+
+        console.print(f"[cyan]🛡️ Generating Rapid Response Battlecard for: {competitor_product}...[/cyan]")
+
+        template = """
+[Competitor Product Name] - Rapid Response [Internal]
+Authors: CompetePulse Agent
+Last Updated: {date}
+Self Link: [go/link]
+
+🚨 TLDR
+What it is: [1-2 sentences summarizing the competitor's product and its core goal, e.g., an agentic research preview for local execution].
+The Catch/Limitation: [1 sentence highlighting the biggest flaw, e.g., lacks audit logs, constrained to a specific ecosystem, or has data residency issues].
+The Google Advantage: [1 sentence on how Gemini Enterprise/Google Cloud wins, e.g., cloud-native governance, deep integrations, open ecosystem].
+
+📖 Overview: What is [Competitor Product Name]?
+Briefly explain the product as if the seller has never heard of it.
+
+Core Functionality: [Explain what the product actually does and how the end-user interacts with it].
+
+Key Capabilities: 
+* [Capability 1]: [Brief description]
+* [Capability 2]: [Brief description]
+* [Capability 3]: [Brief description]
+
+Availability & Pricing: [When is it launching? Who gets it? Does it cost extra?]
+
+Strategic Context (Optional): [Why is the competitor launching this now? What broader strategy does it reveal?]
+
+⚠️ Risks & Concerns for Customers
+Equip sellers with the FUD (Fear, Uncertainty, Doubt) to bring up in customer conversations.
+* [Risk 1 e.g., Experimental Nature/Trust]: [Explain why customers should be cautious, such as probabilistic nature or lack of human oversight].
+* [Risk 2 e.g., Security & Governance Gaps]: [Highlight issues like local-only execution, lack of audit logs, or missing compliance APIs].
+* [Risk 3 e.g., Ecosystem Lock-in / Integration Limits]: [Note if the product struggles to operate outside of its proprietary ecosystem or lacks 3P integrations].
+* [Risk 4 e.g., Data Residency]: [Mention if the tool cannot guarantee regional data boundaries, like EU restrictions].
+
+💡 How Gemini Enterprise Differentiates
+This is the core battlecard section. Use the "Competitor Weakness vs. The GE Advantage" format.
+
+1. [Differentiator Theme 1, e.g., Embedded Governance vs. The Overlay Tax]
+The Competitor: [Explain how the competitor handles this poorly, e.g., operating as an unmanaged "black box" or requiring secondary management suites].
+The GE Advantage: [Explain Google's solution, e.g., Agent Identity, VPC-SC, Data Loss Prevention, or Model Armor].
+
+2. [Differentiator Theme 2, e.g., Open Ecosystem vs. Walled Garden]
+The Competitor: [Explain their integration limits].
+The GE Advantage: [Highlight Google's Federated Connectors, Runtime Mesh, and A2A protocols].
+
+3. [Differentiator Theme 3, e.g., Glass Box Observability vs. Black Box Execution]
+The Competitor: [Explain the lack of visibility/auditability].
+The GE Advantage: [Highlight Google's trace span views, logs, and unified telemetry].
+
+(Add additional differentiators as needed, such as "Cloud Execution vs. Local Dependency" or "Built-in Identity".)
+
+📊 Feature Mapping Summary
+A quick-reference matrix for side-by-side comparison.
+
+| "[Competitor Product]" Capability | Gemini Enterprise Equivalent | Status |
+| :--- | :--- | :--- |
+| [Competitor Feature 1] | [Google Feature/Tool Name] | [e.g., General Availability / Private Preview] |
+| [Competitor Feature 2] | [Google Feature/Tool Name] | [Status] |
+| [Competitor Feature 3] | [Google Feature/Tool Name] | [Status] |
+
+📎 Appendix & Resources
+Exhibit A: [Brief description of what screenshots/diagrams would be relevant]
+Helpful Links:
+[Link to Google Workspace response if applicable]
+[Link to official competitor announcement]
+"""
+
+        prompt = f"""
+        <system_instructions>
+        You are a Lead Strategic AI Analyst at Google Cloud. 
+        Your task is to generate a high-fidelity 'Rapid Response' battlecard for the field.
+        Focus on technical accuracy, competitive positioning, and actionable field intelligence.
+        Use professional, authoritative language.
+        </system_instructions>
+
+        <task>
+        Fill out the following Rapid Response template for the competitor product: '{competitor_product}'.
+        Ensure the 'Risks & Concerns' and 'Differentiators' sections are high-signal and tailored to Google's strengths (Vertex AI, 2M context window, Security/Governance).
+        </task>
+
+        <template_structure>
+        {template.format(date=datetime.now().strftime('%Y-%m-%d'))}
+        </template_structure>
+
+        <constraints>
+        - DO NOT include internal project names except for public-facing ones like Gemini, Vertex AI, etc.
+        - Be aggressive but professional in highlighting competitor flaws.
+        - Use Markdown formatting.
+        - Return ONLY the completed template.
+        </constraints>
+        """
+
+        try:
+            resp = self.client.models.generate_content(model='gemini-2.5-pro', contents=prompt)
+            return resp.text.strip()
+        except Exception as e:
+            return f"Error: Failed to generate rapid response: {e}"
+
 
     def promote_learnings(self, synthesized_content: Dict[str, Any], days: int=1):
         items = synthesized_content.get('items', [])
@@ -518,7 +618,7 @@ class CompetePulseAgent:
             Include 1-2 relevant emojis to make it stand out in field reports.
             </format>
             """
-            response = self.client.models.generate_content(model='gemini-3.1-flash-lite', contents=prompt)
+            response = self.client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
             summary = response.text.strip()
             self._summary_cache[cache_key] = summary
             return summary
@@ -532,7 +632,7 @@ class CompetePulseAgent:
         if self.client:
             try:
                 refine_prompt = f'Summarize this for a business audience in 2 sentences focus on impact: {summary}'
-                resp = self.client.models.generate_content(model='gemini-3.1-flash-lite', contents=refine_prompt)
+                resp = self.client.models.generate_content(model='gemini-2.5-flash', contents=refine_prompt)
                 summary = resp.text.strip()
             except Exception:
                 pass

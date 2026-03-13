@@ -1,0 +1,34 @@
+name: Competitive Rapid Response 🛡️
+
+on:
+  workflow_dispatch:
+    inputs:
+      competitor_product:
+        description: "Competitor product to analyze (e.g. 'Claude CoWork')"
+        required: true
+        default: 'Claude CoWork'
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+          
+      - name: Install dependencies
+        run: |
+          pip install .
+          
+      - name: Generate Rapid Response
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: |
+          echo "### Competitive Rapid Response: ${{ github.event.inputs.competitor_product }}" >> $GITHUB_STEP_SUMMARY
+          compete-pulse response "${{ github.event.inputs.competitor_product }}" --raw >> $GITHUB_STEP_SUMMARY
