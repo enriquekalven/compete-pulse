@@ -60,7 +60,7 @@ graph TD
 ## 🚀 How it Works (The Lifecycle)
 
 ### 1. Automated Scrutiny
-The **Watcher** scans official release feeds (Vertex AI, Anthropic, OpenAI) and code movements (ADK, A2UI, Genkit) every 24-48 hours.
+The **Watcher** scans official release feeds (Vertex AI, Anthropic, OpenAI) and code movements (ADK, A2UI, Genkit) **every day at 8:00 AM PST**.
 
 ### 2. Impact Ranking (Flash Engine)
 Uses **Gemini 2.5 Flash** to assign a **Strategic Impact Score (1-100)**. This ensures major launches like Gemini 2.5 or Sovereign AI updates are prioritized over minor SDK patches.
@@ -106,22 +106,22 @@ compete-pulse query "How did we respond to Claude 3.5 Sonnet launch?"
 ### Rapid Response Battlecard
 ```bash
 # Generate a high-fidelity 'Rapid Response' battlecard for a competitor product
-compete-pulse response "Claude CoWork"
+compete-pulse response "Claude CoWork" --raw
 ```
 
-**GitHub Action Trigger**: You can also trigger this analysis on-demand via the **Actions** tab in GitHub using the "Competitive Rapid Response" workflow.
+**🛡️ GitHub Action Trigger**: You can trigger this analysis on-demand via the **Actions** tab in GitHub using the **"Competitive Rapid Response"** workflow. It renders the battlecard directly into the workflow summary for quick executive sharing.
 
 ---
 
 ## 🔐 Environment Configuration
 To run the agent locally or in CI/CD, configure the following:
 
-| Variable | Description |
-| :--- | :--- |
 | `GOOGLE_API_KEY` | API Key for Gemini 2.5 Flash/Pro access. |
 | `COMPETE_PULSE_SENDER_EMAIL` | Sender address for automated pulses. |
 | `COMPETE_PULSE_SENDER_PASSWORD` | Google **App Password** for secure delivery. |
+| `RECIPIENT_EMAIL` | Comma-separated list of target emails (optional fallback). |
 | `GCHAT_WEBHOOK_URL` | Webhook for real-time corridor alerts. |
+| `GITHUB_TOKEN` | Required for dispatching reports to GitHub Issues. |
 
 ---
 
