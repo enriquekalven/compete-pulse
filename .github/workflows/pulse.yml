@@ -2,8 +2,8 @@ name: Compete Pulse 🚀
 
 on:
   schedule:
-    # Run every Monday and Wednesday at 9:00 AM PST (17:00 UTC)
-    - cron: '0 17 * * 1,3'
+    # Run every day at 8:00 AM PST (16:00 UTC)
+    - cron: '0 16 * * *'
   workflow_dispatch:
     inputs:
       days:
