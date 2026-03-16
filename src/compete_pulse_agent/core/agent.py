@@ -451,110 +451,137 @@ class CompetePulseAgent:
             for i in items: i['impact_score'] = 0
             return items[:20]
 
+    @retry(wait=wait_exponential(min=2, max=10), stop=stop_after_attempt(3))
     def generate_rapid_response(self, competitor_product: str) -> str:
         """
-        Generates a 'Rapid Response' battlecard for a specific competitor product using a standardized template.
+        Generates a high-fidelity competitive battlecard using the ADK 'Analyst' pattern:
+        1. Research Planner (Flash) - Determines key areas to investigate.
+        2. Deep Researcher (Pro + Search) - Gathers technical and strategic intel.
+        3. Strategic Critic (Flash) - Identifies gaps or bias in the research.
+        4. Final Scribe (Pro) - Synthesizes the battlecard template.
         """
         if not self.client:
-            return "Error: Gemini client not initialized. Cannot generate rapid response."
+            return "Error: Gemini Client not initialized. Check GOOGLE_API_KEY."
 
-        console.print(f"[cyan]🛡️ Generating Rapid Response Battlecard for: {competitor_product}...[/cyan]")
+        console.print(f"[cyan]🛡️ Initializing Agentic 'Analyst' Loop for: {competitor_product}...[/cyan]")
 
-        template = """
-[Competitor Product Name] - Rapid Response [Internal]
-Authors: CompetePulse Agent
-Last Updated: {date}
-Self Link: [go/link]
+        # --- PHASE 1: RESEARCH PLANNER ---
+        console.print("[dim]📋 Phase 1: Planning research trajectory...[/dim]")
+        plan_prompt = f"""
+        Act as a Principal Competitive Analyst. Create a research plan for a new competitor product: '{competitor_product}'.
+        Identify 5 critical technical and 3 strategic business areas to investigate to find weaknesses vs Google Cloud.
+        Focus on architectural gaps, security/governance differences, and ecosystem lock-in.
+        Return only the plan as a bulleted list.
+        """
+        plan_response = self.client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=scrub_pii(plan_prompt)
+        )
+        research_plan = plan_response.text
 
-🚨 TLDR
-What it is: [1-2 sentences summarizing the competitor's product and its core goal, e.g., an agentic research preview for local execution].
-The Catch/Limitation: [1 sentence highlighting the biggest flaw, e.g., lacks audit logs, constrained to a specific ecosystem, or has data residency issues].
-The Google Advantage: [1 sentence on how Gemini Enterprise/Google Cloud wins, e.g., cloud-native governance, deep integrations, open ecosystem].
+        # --- PHASE 2: DEEP RESEARCHER (with Search) ---
+        console.print("[dim]🔍 Phase 2: Executing deep technical research (Google Search grounded)...[/dim]")
+        search_tool = {'google_search': {}}
+        research_prompt = f"""
+        Execute deep research on '{competitor_product}' based on this plan:
+        {research_plan}
+        
+        Using Google Search, find technical details, limitations, data residency policies, and enterprise gaps.
+        Look for 'Waitlist' vs 'GA' status and specific architectural dependencies.
+        Return a comprehensive fact sheet with technical snippets.
+        """
+        research_response = self.client.models.generate_content(
+            model='gemini-2.5-pro',
+            contents=scrub_pii(research_prompt),
+            config={'tools': [search_tool]}
+        )
+        raw_intel = research_response.text
 
-📖 Overview: What is [Competitor Product Name]?
-Briefly explain the product as if the seller has never heard of it.
+        # --- PHASE 3: STRATEGIC CRITIC ---
+        console.print("[dim]⚖️ Phase 3: Strategic Critic review (Auditing for gaps)...[/dim]")
+        critic_prompt = f"""
+        Review the following research for '{competitor_product}':
+        {raw_intel}
 
-Core Functionality: [Explain what the product actually does and how the end-user interacts with it].
+        Identify 2 specific areas where the research is surface-level or where a seller might be stumped.
+        Suggest the 'Google Cloud Advantage' for these gaps (e.g., VPC-SC, Data Residency, 2M Context).
+        Return only the critique and suggestions.
+        """
+        critic_response = self.client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=scrub_pii(critic_prompt)
+        )
+        strategic_critique = critic_response.text
 
-Key Capabilities: 
-* [Capability 1]: [Brief description]
-* [Capability 2]: [Brief description]
-* [Capability 3]: [Brief description]
+        # --- PHASE 4: FINAL SCRIBE ---
+        console.print("[dim]✍️ Phase 4: Synthesizing final L400 Battlecard...[/dim]")
+        
+        final_date = datetime.now().strftime('%B %d, %Y')
+        template = f"""
+        Use the collected intel and critique to fill out this high-fidelity battlecard:
+        
+        [Competitor Product Name] - Rapid Response [Internal]
+        Authors: CompetePulse Analyst (ADK Engine)
+        Last Updated: {final_date}
+        
+        🚨 TLDR
+        What it is: [1-2 sentences summarizing product and goal]
+        The Catch/Limitation: [The absolute biggest flaw identified in research]
+        The Google Advantage: [How Google wins - focus on enterprise scale/trust]
 
-Availability & Pricing: [When is it launching? Who gets it? Does it cost extra?]
+        📖 Overview
+        [Brief technical explanation]
+        
+        Key Capabilities:
+        * [Feature 1]: [Detail]
+        * [Feature 2]: [Detail]
+        
+        ⚠️ Risks & Concerns
+        * [Security/Governance]: [Specific gap identified]
+        * [Scale/Performance]: [Specific gap identified]
+        * [Trust/Grounding]: [Specific gap identified]
 
-Strategic Context (Optional): [Why is the competitor launching this now? What broader strategy does it reveal?]
+        💡 How Gemini Enterprise Differentiates (The Killer Tracks)
+        1. [Theme 1: e.g. Sovereign AI vs Public Cloud Overlays]
+        - Competitor: [Weakness]
+        - Google: [Strength]
+        
+        2. [Theme 2: e.g. Context Mastery]
+        - Competitor: [Weakness]
+        - Google: [Strength]
 
-⚠️ Risks & Concerns for Customers
-Equip sellers with the FUD (Fear, Uncertainty, Doubt) to bring up in customer conversations.
-* [Risk 1 e.g., Experimental Nature/Trust]: [Explain why customers should be cautious, such as probabilistic nature or lack of human oversight].
-* [Risk 2 e.g., Security & Governance Gaps]: [Highlight issues like local-only execution, lack of audit logs, or missing compliance APIs].
-* [Risk 3 e.g., Ecosystem Lock-in / Integration Limits]: [Note if the product struggles to operate outside of its proprietary ecosystem or lacks 3P integrations].
-* [Risk 4 e.g., Data Residency]: [Mention if the tool cannot guarantee regional data boundaries, like EU restrictions].
-
-💡 How Gemini Enterprise Differentiates
-This is the core battlecard section. Use the "Competitor Weakness vs. The GE Advantage" format.
-
-1. [Differentiator Theme 1, e.g., Embedded Governance vs. The Overlay Tax]
-The Competitor: [Explain how the competitor handles this poorly, e.g., operating as an unmanaged "black box" or requiring secondary management suites].
-The GE Advantage: [Explain Google's solution, e.g., Agent Identity, VPC-SC, Data Loss Prevention, or Model Armor].
-
-2. [Differentiator Theme 2, e.g., Open Ecosystem vs. Walled Garden]
-The Competitor: [Explain their integration limits].
-The GE Advantage: [Highlight Google's Federated Connectors, Runtime Mesh, and A2A protocols].
-
-3. [Differentiator Theme 3, e.g., Glass Box Observability vs. Black Box Execution]
-The Competitor: [Explain the lack of visibility/auditability].
-The GE Advantage: [Highlight Google's trace span views, logs, and unified telemetry].
-
-(Add additional differentiators as needed, such as "Cloud Execution vs. Local Dependency" or "Built-in Identity".)
-
-📊 Feature Mapping Summary
-A quick-reference matrix for side-by-side comparison.
-
-| "[Competitor Product]" Capability | Gemini Enterprise Equivalent | Status |
-| :--- | :--- | :--- |
-| [Competitor Feature 1] | [Google Feature/Tool Name] | [e.g., General Availability / Private Preview] |
-| [Competitor Feature 2] | [Google Feature/Tool Name] | [Status] |
-| [Competitor Feature 3] | [Google Feature/Tool Name] | [Status] |
-
-📎 Appendix & Resources
-Exhibit A: [Brief description of what screenshots/diagrams would be relevant]
-Helpful Links:
-[Link to Google Workspace response if applicable]
-[Link to official competitor announcement]
-"""
-
-        prompt = f"""
-        <system_instructions>
-        You are a Lead Strategic AI Analyst at Google Cloud. 
-        Your task is to generate a high-fidelity 'Rapid Response' battlecard for the field.
-        Focus on technical accuracy, competitive positioning, and actionable field intelligence.
-        Use professional, authoritative language.
-        </system_instructions>
-
-        <task>
-        Fill out the following Rapid Response template for the competitor product: '{competitor_product}'.
-        Ensure the 'Risks & Concerns' and 'Differentiators' sections are high-signal and tailored to Google's strengths (Vertex AI, 2M context window, Security/Governance).
-        </task>
-
-        <template_structure>
-        {template.format(date=datetime.now().strftime('%Y-%m-%d'))}
-        </template_structure>
-
-        <constraints>
-        - DO NOT include internal project names except for public-facing ones like Gemini, Vertex AI, etc.
-        - Be aggressive but professional in highlighting competitor flaws.
-        - Use Markdown formatting.
-        - Return ONLY the completed template.
-        </constraints>
+        📊 Feature Mapping Summary
+        | Capability | Google Equivalent | Status |
+        | :--- | :--- | :--- |
+        | [Found Feature 1] | [Google Tool] | [Status] |
+        | [Found Feature 2] | [Google Tool] | [Status] |
         """
 
-        try:
-            resp = self.client.models.generate_content(model='gemini-2.5-pro', contents=prompt)
-            return resp.text.strip()
-        except Exception as e:
-            return f"Error: Failed to generate rapid response: {e}"
+        scribe_prompt = f"""
+        Synthesize the final battlecard for '{competitor_product}'.
+        
+        RAW INTEL:
+        {raw_intel}
+        
+        STRATEGIC CRITIQUE:
+        {strategic_critique}
+        
+        Follow this template exactly:
+        {template}
+        
+        Ensure legal/confidential headers are included. Focus on L400 technical depth.
+        """
+        
+        final_response = self.client.models.generate_content(
+            model='gemini-2.5-pro',
+            contents=scrub_pii(scribe_prompt)
+        )
+        
+        battlecard = final_response.text
+        
+        # Add footer
+        footer = f"\n\n---\n*Generated by CompetePulse Agent with ADK Multi-Agent Analyst Pattern (Plan -> Research -> Critic -> Scribe)*"
+        return battlecard + footer
 
 
     def promote_learnings(self, synthesized_content: Dict[str, Any], days: int=1):
