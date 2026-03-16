@@ -7,6 +7,10 @@ on:
         description: "Competitor product to analyze (e.g. 'Claude CoWork')"
         required: true
         default: 'Claude CoWork'
+      target_product:
+        description: "Google product to compare against (e.g. 'Agent Builder', 'ADK')"
+        required: true
+        default: 'Gemini Enterprise'
 
 jobs:
   analyze:
@@ -30,5 +34,5 @@ jobs:
         env:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: |
-          echo "### Competitive Rapid Response: ${{ github.event.inputs.competitor_product }}" >> $GITHUB_STEP_SUMMARY
-          compete-pulse response "${{ github.event.inputs.competitor_product }}" --raw >> $GITHUB_STEP_SUMMARY
+          echo "### Competitive Rapid Response: ${{ github.event.inputs.competitor_product }} vs ${{ github.event.inputs.target_product }}" >> $GITHUB_STEP_SUMMARY
+          compete-pulse response "${{ github.event.inputs.competitor_product }}" --target "${{ github.event.inputs.target_product }}" --raw >> $GITHUB_STEP_SUMMARY

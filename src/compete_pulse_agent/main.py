@@ -46,8 +46,8 @@ def chat(webhook_url: str=typer.Option(None, '--webhook-url', envvar='GCHAT_WEBH
 
 @app.command()
 def email(recipient: str=typer.Argument(..., help='Recipient email address'), 
-          sender: str=typer.Option(None, '--sender', envvar='CompetePulse_SENDER_EMAIL', help='Sender email address'), 
-          password: str=typer.Option(None, '--password', envvar='CompetePulse_SENDER_PASSWORD', help='Sender email password/token'), 
+          sender: str=typer.Option(None, '--sender', envvar='COMPETE_PULSE_SENDER_EMAIL', help='Sender email address'), 
+          password: str=typer.Option(None, '--password', envvar='COMPETE_PULSE_SENDER_PASSWORD', help='Sender email password/token'), 
           days: int=typer.Option(1, '--days', '-d', help='Number of days to look back'), 
           project: str = typer.Option("project-maui", "--project", help="GCP Project ID"),
           infographic: bool = typer.Option(False, "--infographic", help="Generate and embed a visual pulse infographic")):
@@ -139,11 +139,12 @@ def audit_maturity(package: str = typer.Argument(..., help="PyPI package name to
 
 @app.command()
 def response(competitor_product: str = typer.Argument(..., help="Competitor product name to analyze (e.g. 'Claude CoWork')"), 
+             target: str = typer.Option("Gemini Enterprise", "--target", "-t", help="Google product to compare against (e.g. 'Agent Builder', 'ADK')"),
              project: str = typer.Option("project-maui", "--project", help="GCP Project ID"),
              raw: bool = typer.Option(False, "--raw", help="Output raw markdown instead of rich rendered text")):
     """Generate a 'Rapid Response' battlecard for a specific competitor product."""
     agent = CompetePulseAgent(project_id=project)
-    response_markdown = agent.generate_rapid_response(competitor_product)
+    response_markdown = agent.generate_rapid_response(competitor_product, google_product=target)
     
     if raw:
         print(response_markdown)

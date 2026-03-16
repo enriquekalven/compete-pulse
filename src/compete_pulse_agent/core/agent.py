@@ -452,7 +452,7 @@ class CompetePulseAgent:
             return items[:20]
 
     @retry(wait=wait_exponential(min=2, max=10), stop=stop_after_attempt(3))
-    def generate_rapid_response(self, competitor_product: str) -> str:
+    def generate_rapid_response(self, competitor_product: str, google_product: str = "Gemini Enterprise") -> str:
         """
         Generates a high-fidelity competitive battlecard using the ADK 'Analyst' pattern:
         1. Research Planner (Flash) - Determines key areas to investigate.
@@ -466,10 +466,10 @@ class CompetePulseAgent:
         console.print(f"[cyan]🛡️ Initializing Agentic 'Analyst' Loop for: {competitor_product}...[/cyan]")
 
         # --- PHASE 1: RESEARCH PLANNER ---
-        console.print("[dim]📋 Phase 1: Planning research trajectory...[/dim]")
+        console.print(f"[dim]📋 Phase 1: Planning research trajectory vs {google_product}...[/dim]")
         plan_prompt = f"""
         Act as a Principal Competitive Analyst. Create a research plan for a new competitor product: '{competitor_product}'.
-        Identify 5 critical technical and 3 strategic business areas to investigate to find weaknesses vs Google Cloud.
+        Identify 5 critical technical and 3 strategic business areas to investigate to find weaknesses vs {google_product}.
         Focus on architectural gaps, security/governance differences, and ecosystem lock-in.
         Return only the plan as a bulleted list.
         """
@@ -498,13 +498,13 @@ class CompetePulseAgent:
         raw_intel = research_response.text
 
         # --- PHASE 3: STRATEGIC CRITIC ---
-        console.print("[dim]⚖️ Phase 3: Strategic Critic review (Auditing for gaps)...[/dim]")
+        console.print(f"[dim]⚖️ Phase 3: Strategic Critic review (Focusing on {google_product} advantage)...[/dim]")
         critic_prompt = f"""
         Review the following research for '{competitor_product}':
         {raw_intel}
 
         Identify 2 specific areas where the research is surface-level or where a seller might be stumped.
-        Suggest the 'Google Cloud Advantage' for these gaps (e.g., VPC-SC, Data Residency, 2M Context).
+        Suggest the '{google_product} Advantage' for these gaps (e.g., specific feature differentiators).
         Return only the critique and suggestions.
         """
         critic_response = self.client.models.generate_content(
@@ -541,24 +541,24 @@ class CompetePulseAgent:
         * [Scale/Performance]: [Specific gap identified]
         * [Trust/Grounding]: [Specific gap identified]
 
-        💡 How Gemini Enterprise Differentiates (The Killer Tracks)
-        1. [Theme 1: e.g. Sovereign AI vs Public Cloud Overlays]
+        💡 How {google_product} Differentiates (The Killer Tracks)
+        1. [Theme 1: e.g. Scale vs Fragility]
         - Competitor: [Weakness]
         - Google: [Strength]
         
-        2. [Theme 2: e.g. Context Mastery]
+        2. [Theme 2: e.g. Built-in Governance]
         - Competitor: [Weakness]
         - Google: [Strength]
 
         📊 Feature Mapping Summary
-        | Capability | Google Equivalent | Status |
+        | Capability | {google_product} Equivalent | Status |
         | :--- | :--- | :--- |
         | [Found Feature 1] | [Google Tool] | [Status] |
         | [Found Feature 2] | [Google Tool] | [Status] |
         """
 
         scribe_prompt = f"""
-        Synthesize the final battlecard for '{competitor_product}'.
+        Synthesize the final battlecard for '{competitor_product}' as a direct comparison against {google_product}.
         
         RAW INTEL:
         {raw_intel}
