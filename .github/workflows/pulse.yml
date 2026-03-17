@@ -38,13 +38,18 @@ jobs:
         env:
           GCHAT_WEBHOOK_URL: ${{ secrets.GCHAT_WEBHOOK_URL }}
           COMPETE_PULSE_SENDER_EMAIL: ${{ secrets.COMPETE_PULSE_SENDER_EMAIL || secrets.CompetePulse_SENDER_EMAIL }}
-          COMPETE_PULSE_SENDER_PASSWORD: ${{ secrets.COMPETE_PULSE_SENDER_PASSWORD || secrets.CompetePulse_SENDER_PASSWORD }}
+          COMPETE_PULSE_SENDER_PASSWORD: ${{ secrets.COMPETE_PULSE_SENDER_PASSWORD || secrets.TPC_SENDER_PASSWORD || secrets.CompetePulse_SENDER_PASSWORD }}
           RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL || secrets.Recipient_Email }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: |
           LOOKBACK_DAYS=${{ github.event.inputs.days || '1' }}
           
+          echo "🕵️ Pulse Agent Diagnostic:"
+          echo "  - GChat Webhook: [Length: ${#GCHAT_WEBHOOK_URL}]"
+          echo "  - Email Sender: [Length: ${#COMPETE_PULSE_SENDER_EMAIL}]"
+          echo "  - Email Pass: [Length: ${#COMPETE_PULSE_SENDER_PASSWORD}]"
+          echo "  - GitHub Token: [Length: ${#GITHUB_TOKEN}]"
           if [ -n "$GCHAT_WEBHOOK_URL" ]; then
             compete-pulse chat --days "$LOOKBACK_DAYS"
           fi
