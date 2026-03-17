@@ -5,7 +5,7 @@ import logging
 import asyncio
 from typing import List, Dict, Any, Optional, Literal
 from datetime import datetime, timedelta, timezone
-from google.adk import ADK
+
 from google.genai import Client, types
 from google.genai.errors import ServerError, ClientError
 from rich.console import Console
