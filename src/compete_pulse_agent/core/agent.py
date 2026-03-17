@@ -14,6 +14,7 @@ from rich.markdown import Markdown
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 from .vector_store import CompetePulseVectorStore
+from .pii_scrubber import scrub_pii
 
 console = Console()
 
@@ -33,14 +34,6 @@ def parse_date(date_str: str) -> datetime:
             continue
     # Fallback to a very old date if unparseable
     return datetime.now(timezone.utc) - timedelta(days=365)
-
-def scrub_pii(text: str) -> str:
-    """Redacts potential PII from research content before sending to LLM."""
-    if not text: return ""
-    # Redact common patterns
-    text = re.sub(r'[\w\.-]+@[\w\.-]+\.\w+', '[EMAIL_REDACTED]', text)
-    text = re.sub(r'\b\d{3}-\d{3}-\d{4}\b', '[PHONE_REDACTED]', text)
-    return text
 
 class CompetePulseTools:
     """Standardized toolset for CompetePulse agents."""
