@@ -20,8 +20,11 @@ class EmailBridge:
     def __init__(self, recipient: str, sender_email: str=None, sender_password: str=None, smtp_server: str='smtp.gmail.com', smtp_port: int=587):
         self.recipient = recipient
         # Support both new (standardized) and old (legacy) environment variable names
-        self.sender_email = sender_email or os.environ.get('COMPETE_PULSE_SENDER_EMAIL') or os.environ.get('CompetePulse_SENDER_EMAIL')
-        self.sender_password = sender_password or os.environ.get('COMPETE_PULSE_SENDER_PASSWORD') or os.environ.get('CompetePulse_SENDER_PASSWORD')
+        email_raw = sender_email or os.environ.get('COMPETE_PULSE_SENDER_EMAIL') or os.environ.get('CompetePulse_SENDER_EMAIL')
+        pass_raw = sender_password or os.environ.get('COMPETE_PULSE_SENDER_PASSWORD') or os.environ.get('CompetePulse_SENDER_PASSWORD') or os.environ.get('TPC_SENDER_PASSWORD')
+        
+        self.sender_email = email_raw.strip() if email_raw else None
+        self.sender_password = pass_raw.replace(' ', '') if pass_raw else None
         self.smtp_server = smtp_server
         self.smtp_port = smtp_port
         self.context_cache = None

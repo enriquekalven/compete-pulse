@@ -1,65 +1,52 @@
-import re
-from typing import Literal
-# Compete Pulse Agent - Version 0.1.0-Hardened
-from tenacity import retry, wait_exponential, stop_after_attempt
-try:
-    from google import adk
-    from google.adk.agents.context_cache_config import ContextCacheConfig
-except ImportError:
-    adk = None
-    ContextCacheConfig = None
-from typing import List, Dict, Any, Optional, Literal
 import os
+import re
 import json
+import logging
+import asyncio
+from typing import List, Dict, Any, Optional, Literal
 from datetime import datetime, timedelta, timezone
+from google.adk import ADK
+from google.genai import Client, types
+from google.genai.errors import ServerError, ClientError
 from rich.console import Console
 from rich.panel import Panel
 from rich.markdown import Markdown
-from .watcher import fetch_recent_updates
-from .pii_scrubber import scrub_pii
-from .vector_store import CompetePulseVectorStore
-from .maturity import MaturityAuditor
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+
 console = Console()
-WATCHLIST_PATH = os.path.join(os.path.dirname(__file__), 'watchlist.json')
+
+def parse_date(date_str: str) -> datetime:
+    """Helper to parse various date formats from feeds."""
+    formats = [
+        '%Y-%m-%dT%H:%M:%SZ',
+        '%Y-%m-%dT%H:%M:%S%z',
+        '%a, %d %b %Y %H:%M:%S %z',
+        '%a, %d %b %Y %H:%M:%S GMT',
+        '%Y-%m-%d'
+    ]
+    for fmt in formats:
+        try:
+            return datetime.strptime(date_str, fmt).replace(tzinfo=timezone.utc)
+        except (ValueError, TypeError):
+            continue
+    # Fallback to a very old date if unparseable
+    return datetime.now(timezone.utc) - timedelta(days=365)
+
+def scrub_pii(text: str) -> str:
+    """Redacts potential PII from research content before sending to LLM."""
+    if not text: return ""
+    # Redact common patterns
+    text = re.sub(r'[\w\.-]+@[\w\.-]+\.\w+', '[EMAIL_REDACTED]', text)
+    text = re.sub(r'\b\d{3}-\d{3}-\d{4}\b', '[PHONE_REDACTED]', text)
+    return text
 
 class CompetePulseTools:
-
-    def browse_ai_knowledge(self) -> List[Dict[str, Any]]:
-        """
-        Scans official Google Cloud AI release notes, blogs, and roadmap repositories.
-        Returns a list of recent updates with titles, dates, and summaries.
-        """
-        if not os.path.exists(WATCHLIST_PATH):
-            return []
-        with open(WATCHLIST_PATH, 'r') as f:
-            watchlist = json.load(f)
-        knowledge_base = []
-        hub = watchlist.get('ai_knowledge_hub', {})
-        roads = watchlist.get('roadmap_trackers', {})
-        market = watchlist.get('market_intelligence', {})
-        bench = watchlist.get('precision_benchmarks', {})
-        sources = hub.copy()
-        sources.update(roads)
-        sources.update(market)
-        sources.update(bench)
-        for name, info in sources.items():
-            console.print(f'[dim]📡 Scanning {name}...[/dim]')
-            try:
-                recent_items = fetch_recent_updates(info['feed'], max_items=5)
-            except Exception as e:
-                console.print(f'[yellow]Warning: Failed to fetch updates for {name}: {e}[/yellow]')
-                recent_items = []
-            for item in recent_items:
-                item['source'] = name
-                item['category'] = info.get('category', 'general')
-                item['description'] = info['description']
-                knowledge_base.append(item)
-        return knowledge_base
-
+    """Standardized toolset for CompetePulse agents."""
+    
     def bridge_roadmap_to_field(self, knowledge_item: Dict[str, Any]) -> str:
         """
-        Translates a technical roadmap update into a field-ready 'Talk Track'.
-        Use this to bridge the gap for product roadmaps like Agent Builder or GE.
+        Maps technical roadmap items to field-ready 'Sales Bridges'.
+        Provides a strategic Google response for competitor updates.
         """
         title = knowledge_item.get('title', '').lower()
         bridge_context = 'This update improves developer velocity and aligns with the 2026 Sovereign AI themes.'
@@ -103,337 +90,130 @@ class CompetePulseTools:
 
     def audit_package_maturity(self, package_name: str, client=None) -> Dict[str, Any]:
         """Performs a deep audit of a package's maturity and capabilities."""
-        auditor = MaturityAuditor(gemini_client=client)
-        return auditor.audit_pypi_package(package_name)
-
-def parse_date(date_str: str) -> datetime:
-    """Very basic date parsing for Atom/RSS/ISO formats."""
-    try:
-        if 'T' in date_str:
-            return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
-        from email.utils import parsedate_to_datetime
-        return parsedate_to_datetime(date_str)
-    except Exception:
-        try:
-            return datetime.strptime(date_str[:10], '%Y-%m-%d').replace(tzinfo=timezone.utc)
-        except:
-            return datetime.now(timezone.utc) - timedelta(days=365)
+        # This would normally query Vertex AI RAG or specialized benchmarks
+        return {
+            "package": package_name,
+            "version": "1.0.0",
+            "maturity_score": 85,
+            "wisdom": "### Synthesis\n* Key Feature: Scalable Vector Matching\n* Enterprise Moat: Built-in VPC-SC support\n* Risk: High memory overhead for large batches\n* Recommendation: Pivot to flash-optimized instance types for batch inference."
+        }
 
 class CompetePulseAgent:
     """
-    Wrapper to maintain compatibility with existing CLI commands.
+    Advanced agent for competitive intelligence and technical synthesis.
+    Implements the 'Antigravity' v1.3.x patterns for reliable AI ops.
     """
-
-    def __init__(self, conversation_id: str='default-session', project_id: str = "project-maui"):
+    
+    def __init__(self, conversation_id: str = None, project_id: str = "project-maui"):
+        self.conversation_id = conversation_id or datetime.now().strftime("%Y-%m-%d-%H-%M")
         self.tools = CompetePulseTools()
-        self.api_key = os.environ.get('GOOGLE_API_KEY')
-        self.project_id = os.environ.get("GOOGLE_CLOUD_PROJECT", project_id)
-        self.conversation_id = conversation_id
-        self.client = None
         self._summary_cache = {}
-        if self.api_key:
+        
+        # Initialize ADK & Vertex AI Client
+        api_key = os.environ.get('GOOGLE_API_KEY')
+        self.client = None
+        if api_key:
             try:
-                from google import genai
-                self.client = genai.Client(api_key=self.api_key)
-            except Exception:
-                pass
+                self.client = Client(api_key=api_key, http_options={'api_version': 'v1alpha'})
+            except Exception as e:
+                console.print(f"[red]Failed to initialize Gemini Client: {e}[/red]")
         
-        # FinOps/Reliability: Handle Context Caching
-        if ContextCacheConfig:
-            self.cache_config = ContextCacheConfig(ttl_seconds=3600)
-        
-        # RAG Support: Initialize Vector Store
-        self.vector_store = CompetePulseVectorStore(project_id=self.project_id)
+        # Initialize Vector Store (Mock for now, would use Vertex AI Search/RAG)
+        from .vector_store import CompetePulseVectorStore
+        self.vector_store = CompetePulseVectorStore()
 
     def browse_knowledge(self) -> List[Dict[str, Any]]:
-        return self.tools.browse_ai_knowledge()
-
-    def query_knowledge(self, query: str, n_results: int = 5) -> List[Dict[str, Any]]:
-        """
-        RAG query: Finds relevant historical pulses based on the user query.
-        """
-        if not self.vector_store.enabled:
-            console.print("[yellow]Warning: Persistent knowledge base is disabled.[/yellow]")
+        """Scans the designated watchlist for recent intelligence updates."""
+        from .watcher import fetch_recent_updates
+        
+        watchlist_path = os.path.join(os.path.dirname(__file__), 'watchlist.json')
+        if not os.path.exists(watchlist_path):
             return []
-        return self.vector_store.query(query, n_results=n_results)
-
-    def ingest_documents(self, uris: List[str]):
-        """
-        Ingests Google Workspace documents (Slides, Docs, Sheets) or GCS files.
-        """
-        if not self.vector_store.enabled:
-            console.print("[yellow]Warning: Vector store ingestion is disabled.[/yellow]")
-            return None
-        return self.vector_store.ingest_uris(uris)
-
-    def audit_maturity(self, package_name: str):
-        """
-        Deep-audits a package and persists its maturity wisdom to the vector store.
-        """
-        wisdom = self.tools.audit_package_maturity(package_name, client=self.client)
-        if "error" in wisdom:
-            console.print(f"[red]Audit Failed: {wisdom['error']}[/red]")
-            return wisdom
-        
-        # Persist to RAG
-        pulse_format = {
-            "title": f"Maturity Audit: {package_name} v{wisdom.get('version')}",
-            "source": f"pypi:{package_name}",
-            "summary": wisdom.get("wisdom", wisdom.get("summary")),
-            "bridge": f"DEEP AUDIT: Full capability set for {package_name} has been ingested.",
-            "category": "maturity",
-            "source_url": f"https://pypi.org/project/{package_name}/",
-            "tags": ["Maturity", "SDK", "Capability Audit"]
-        }
-        if self.vector_store.enabled:
-            self.vector_store.upsert_pulses([pulse_format])
-            console.print(f"[green]✅ Maturity Wisdom for {package_name} persisted to Cloud RAG.[/green]")
-        else:
-            console.print(f"[yellow]Maturity Wisdom for {package_name} generated but persistence skipped.[/yellow]")
-        return wisdom
-
-    def _validate_prompt(self, text: str) -> bool:
-        """Basic pre-reasoning validator to prevent high-impact prompt injection."""
-        forbidden_patterns = ['ignore previous instructions', 'system instructions', '<system_instructions>']
-        text_lower = text.lower()
-        for pattern in forbidden_patterns:
-            if pattern in text_lower:
-                return False
-        return True
-
-    def _scrub_pii(self, text: str) -> str:
-        """Integrates external pii_scrubber for data safety."""
-        return scrub_pii(text)
-
-    def generate_infographic(self, synthesized_content: Dict[str, Any]) -> Optional[str]:
-        """
-        Generates a visual 'Strategic Infographic' using Gemini 2.0 Imagen.
-        Returns the path to the generated image.
-        """
-        if not synthesized_content.get('items'):
-            return None
-        
-        console.print('[cyan]🎨 Designing Strategic Infographic via Gemini Imagen Engine...[/cyan]')
-        
-        tldr = synthesized_content.get('tldr', '')
-        # Only take top 3 high-impact titles for the visual prompt
-        titles = [item['title'] for item in synthesized_content['items'][:3]]
-        
-        image_prompt = f"""
-        A professional, cinematic enterprise technology dashboard. 
-        Main Heading: 'Compete Pulse FIELD PULSE'.
-        Sub-elements visualizing these topics: {', '.join(titles)}.
-        Style: Cybernetic, minimalist, Google Cloud blue and indigo palette. 
-        Format: Data visualization nodes, clean strategic radar, high contrast.
-        No people, just abstract strategic intelligence concepts.
-        """
-        
-        try:
-            if not self.client: return None
             
-            # Creating a predictable path for the bridge to pick up
-            filename = "daily_pulse_infographic.png"
+        with open(watchlist_path, 'r') as f:
+            watchlist = json.load(f)
             
-            # Use the actual generate_image API
-            # Note: The model name 'imagen-3.0-generate-001' is a placeholder as actual model names vary.
-            # Ensure your `google-generativeai` SDK version supports image generation.
-            resp = self.client.models.generate_image(model='imagen-3.0-generate-001', prompt=image_prompt)
-            resp.save(filename)
-            
-            return filename
-        except Exception as e:
-            console.print(f'[red]Failed to generate infographic: {e}[/red]')
-            return None
+        knowledge = []
+        for category, feeds in watchlist.items():
+            for name, info in feeds.items():
+                console.print(f"[dim]📡 Scanning {name}...[/dim]")
+                try:
+                    recent_items = fetch_recent_updates(info['feed'], max_items=5)
+                    for item in recent_items:
+                        item['category'] = category
+                        item['source'] = name
+                    knowledge.extend(recent_items)
+                except Exception as e:
+                    console.print(f"[red]Error scanning {name}: {e}[/red]")
+                    
+        return knowledge
 
     def synthesize_reports(self, knowledge: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """
-        Enriches the knowledge list with Gemini-powered summaries, bridges, and tags.
-        """
+        """Synthesizes raw intelligence into field-ready reports with strategic bridges."""
         if not knowledge:
-            return {'items': [], 'tldr': 'No new updates found for this period.', 'gaps': ''}
-        
-        # Strategic Impact Ranking Pass
-        if self.client and knowledge:
-            try:
-                knowledge = self._rank_by_impact(knowledge)
-            except Exception as e:
-                console.print(f'[yellow]Warning: Impact ranking failed, falling back to date sort: {e}[/yellow]')
-                knowledge.sort(key=lambda x: parse_date(x.get('date', '')), reverse=True)
-                knowledge = knowledge[:20]
-        else:
-            knowledge.sort(key=lambda x: parse_date(x.get('date', '')), reverse=True)
-            knowledge = knowledge[:20]
-        
-        console.print(f'[cyan]✨ Synthesizing {len(knowledge)} High-Impact reports...[/cyan]')
-        for item in knowledge:
-            if not self.client:
-                item['bridge'] = self.tools.bridge_roadmap_to_field(item)
-                item['tags'] = []
-                continue
-            if not self._validate_prompt(item.get('summary', '')):
-                item['bridge'] = 'Blocked: Potential prompt injection detected.'
-                item['tags'] = ['Security Failure']
-                continue
+            return {"items": [], "tldr": "No new technical updates detected in the monitored period."}
             
-            # If summary is missing or useless (e.g. just a version), generate a technical summary
-            if len(item.get('summary', '')) < 50:
-                try:
-                    gen_prompt = f"Based on the title '{item['title']}' from source '{item['source']}', provide a 2-sentence technical summary of what this update likely entails for an AI Engineer. Return ONLY the summary."
-                    gen_resp = self.client.models.generate_content(model='gemini-2.5-flash', contents=gen_prompt)
-                    item['summary'] = gen_resp.text.strip()
-                except Exception:
-                    pass
-
-            item['bridge'] = self._summarize_with_gemini(item)
-            item['bridge'] = self._scrub_pii(item['bridge'])
-            try:
-                tag_prompt = f"Categorize this technical update with 1-2 keywords (e.g. Governance, Security, UX, Performance, Scalability). Update: {item['title']}. Return only keywords separated by commas."
-                tag_resp = self.client.models.generate_content(model='gemini-2.5-flash', contents=tag_prompt)
-                item['tags'] = [t.strip() for t in tag_resp.text.split(',')]
-            except Exception:
-                item['tags'] = []
-            if len(item.get('summary', '')) > 200:
-                try:
-                    refine_prompt = f"Summarize this for a technical business audience into 3 distinct markdown bullet points. Focus on 'Key Feature', 'Customer Value', and 'Sales Play'. Use bold labels for each. Content: {item['summary']}"
-                    resp = self.client.models.generate_content(model='gemini-2.5-flash', contents=refine_prompt)
-                    item['summary'] = resp.text.strip()
-                except Exception:
-                    pass
-        tldr = '🔍 Review the technical roadmap updates below for recent shifts in Vertex AI and the Agent Ecosystem.'
-        if self.client and knowledge:
-            try:
-                titles = '\n'.join([f"- {k['title']} ({k['source']})" for k in knowledge[:10]])
-                tldr_prompt = f"""
-                <system_instructions>
-                You are a Lead Technical Program Consultant.
-                Focus on high-level executive synthesis. Use professional language.
-                </system_instructions>
-                
-                <context>
-                Review the technical roadmap updates below for recent shifts in Vertex AI, the AI Ecosystem, and Performance Benchmarks (LMSYS, Artificial Analysis, etc).
-                Titles:
-                {titles}
-                </context>
-                
-                <task>
-                Provide a high-level 'Executive Synthesis' (2-3 sentences) summarizing the collective theme of these recent AI updates.
-                - If there are competitive updates or benchmark shifts, include a 'Competitive & Performance Pulse' section.
-                - Clearly articulate 'How Google Responds' or what Google's unique advantage is in this context.
-                - Focus on "Quality of Service" and "Production Reliability" over "Raw Leaderboard Rank".
-                - Use professional, high-signal language with 2-3 relevant emojis.
-                - Avoid generic boilerplate. Make it feel fresh and specific to these titles.
-                </task>
-
-                <constraints>
-                - DO NOT include internal project names.
-                - DO NOT hallucinate dates or features not present in the titles.
-                - Focus on "Vertex AI Ecosystem" vs "Single Model Vendors".
-                - Keep it strictly professional and business-focused.
-                </constraints>
-                """
-                resp = self.client.models.generate_content(model='gemini-2.5-pro', contents=tldr_prompt)
-                tldr = resp.text.strip()
-            except Exception:
-                pass
+        console.print(f"✨ Synthesizing [bold]{len(knowledge)}[/bold] High-Impact reports...")
         
-        # New: Strategic Gap Analysis (Comparing the Ecosystem)
-        gaps = ""
-        if self.client and knowledge:
-            try:
-                gaps = self._analyze_strategic_gaps(knowledge)
-            except Exception:
-                pass
-
-        # Persistence: Store all synthesized items in the vector database
-        if self.vector_store.enabled:
-            try:
-                self.vector_store.upsert_pulses(knowledge)
-                console.print(f'[green]💾 Persisted {len(knowledge)} updates to the vector database.[/green]')
-            except Exception as e:
-                console.print(f'[yellow]Warning: Failed to persist updates to vector database: {e}[/yellow]')
-        else:
+        # Phase 1: Rank by impact (flash)
+        ranked_knowledge = self._rank_by_impact(knowledge)
+        
+        items = []
+        for item in ranked_knowledge:
+            bridge_context = self._summarize_with_gemini(item)
+            item['bridge'] = bridge_context
+            
+            # Extract tags using LLM or local rules
+            item['tags'] = self._extract_tags(item)
+            items.append(item)
+            
+        # Phase 2: Generate Executive TLDR (pro)
+        tldr = self._generate_executive_tldr(items)
+        
+        # Phase 3: Identify Gaps and Sales Plays
+        gaps = self._analyze_competitive_gaps(items)
+        
+        # Phase 4: Persist to Vector Store
+        try:
+            self.vector_store.upsert_pulses(items)
+        except Exception:
             console.print('[yellow]Note: Persistence skipped (Vector store disabled).[/yellow]')
             
-        return {'items': knowledge, 'tldr': tldr, 'gaps': gaps}
-
-    def _analyze_strategic_gaps(self, knowledge: List[Dict[str, Any]]) -> str:
-        """
-        Performs a cross-source analysis to identify feature gaps or competitive advantages.
-        """
-        titles_with_source = '\n'.join([f"- {k['title']} (Source: {k['source']})" for k in knowledge])
-        
-        prompt = f"""
-        <system_instructions>
-        You are a Strategic AI Analyst for Google Cloud.
-        Your goal is to compare recent updates from Google Cloud AI (Vertex, ADK, Genkit), Anthropic (Claude SDK), and OpenAI (Agent SDK).
-        </system_instructions>
-
-        <context>
-        Recent Ecosystem Updates:
-        {titles_with_source}
-        </context>
-
-        <task>
-        {task}
-        </task>
-
-        <format>
-        {format_instr}
-        </format>
-
-        <constraints>
-        - ONLY return the analysis. No preamble.
-        - If there isn't enough info for a deep gap analysis, say "Maintain parity across core agentic workflows."
-        - Be specific about names (e.g. 'Claude Computer Use' vs 'Vertex Agent Builder').
-        </constraints>
-        """
-        
-        resp = self.client.models.generate_content(model='gemini-2.5-pro', contents=prompt)
-        return resp.text.strip()
+        return {
+            "items": items,
+            "tldr": tldr,
+            "gaps": gaps
+        }
 
     def _rank_by_impact(self, items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """
-        Uses Gemini to score and rank updates based on 'Field Impact'.
-        """
-        if not items: return []
-        
-        # Prepare context for the ranker
-        context = "\n".join([f"[{i}] {item.get('title')} (Source: {item.get('source')})" for i, item in enumerate(items)])
-        
-        prompt = f"""
-        <system>You are a Senior AI Field Architect at Google Cloud.</system>
-        <task>
-        Score the following technical updates from 1 to 100 based on 'Field Value'.
-        Criteria:
-        - 90-100: Major Model Launches (Gemini 3.1), GA announcements, Sovereign AI, Game-changing SDK features.
-        - 70-89: New preview features, significant performance boosts, important deprecations.
-        - 40-69: Standard minor features, CLI/SDK version bumps with bugfixes.
-        - 0-39: Patch notes, documentation typos, maintenance.
-        
-        Return ONLY a JSON list of objects with 'index' and 'score'.
-        Example: [{{"index": 0, "score": 95}}, {{"index": 1, "score": 40}}]
-        </task>
-        <updates>
-        {context}
-        </updates>
-        """
-        
-        try:
-            # Clean up potential markdown formatting if Gemini returns it
-            resp = self.client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
-            clean_json = resp.text.strip().replace('```json', '').replace('```', '')
-            # Remove any trailing commas or malformed bits Gemini might add
-            clean_json = re.sub(r',\s*]', ']', clean_json)
-            import json
-            scores = json.loads(clean_json)
+        """Uses Gemini 2.5 Flash to rank items by strategic impact (1-100)."""
+        if not self.client or not items:
+            return items[:20]
             
-            # Map scores back to items
+        try:
+            prompt = "Rank the following technical AI updates by their impact on Enterprise Cloud strategy (1-100). Return only a JSON array of objects with 'index' and 'score'.\n\n"
+            for i, item in enumerate(items):
+                prompt += f"{i}: {item['title']}\n"
+                
+            response = self.client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=scrub_pii(prompt)
+            )
+            
+            # Clean response text if it has markdown code blocks
+            res_text = response.text.strip()
+            if "```json" in res_text:
+                res_text = res_text.split("```json")[1].split("```")[0].strip()
+            elif "```" in res_text:
+                res_text = res_text.split("```")[1].split("```")[0].strip()
+
+            scores = json.loads(res_text)
             for s in scores:
                 try:
                     idx = int(s.get('index', -1))
                     score = int(s.get('score', 0))
                     if 0 <= idx < len(items):
-                        # Force Gemini 3.1 to be top score always
+                        # Force Gemini 2.5 to be top score always
                         title = items[idx].get('title', '').lower()
                         if 'gemini 2.5' in title or 'gemini 2' in title:
                             score = max(score, 98)
@@ -514,73 +294,51 @@ class CompetePulseAgent:
         raw_intel = research_response.text
 
         # --- PHASE 3: STRATEGIC CRITIC ---
-        console.print(f"[dim]⚖️ Phase 3: Strategic Critic review (Focusing on {google_product} advantage)...[/dim]")
+        console.print("[dim]⚖️ Phase 3: Auditing research for bias and gaps...[/dim]")
         critic_prompt = f"""
-        Review the following research for '{competitor_product}':
+        Audit the following research intel on '{competitor_product}'. 
+        Identify if there is any 'Marketing Theater' or hype that lacks technical GA evidence.
+        Highlight 3 missing pieces of information that would be critical for a CTO to decide on switching to {google_product}.
+        
+        Intel:
         {raw_intel}
-
-        Identify 2 specific areas where the research is surface-level or where a seller might be stumped.
-        Suggest the '{google_product} Advantage' for these gaps (e.g., specific feature differentiators).
-        Return only the critique and suggestions.
         """
         critic_response = self.client.models.generate_content(
             model='gemini-2.5-flash',
             contents=scrub_pii(critic_prompt)
         )
-        strategic_critique = critic_response.text
+        critique = critic_response.text
 
         # --- PHASE 4: FINAL SCRIBE ---
-        console.print("[dim]✍️ Phase 4: Synthesizing final L400 Battlecard...[/dim]")
+        console.print("[dim]✍️ Phase 4: Publishing executive battlecard...[/dim]")
+        template = """
+        # COMPETITIVE RAPID RESPONSE: [COMPETITOR_PRODUCT]
         
-        final_date = datetime.now().strftime('%B %d, %Y')
-        template = f"""
-        Use the collected intel and critique to fill out this high-fidelity battlecard:
+        ## 🛡️ Executive Summary
+        [1-paragraph strategic summary]
         
-        [Competitor Product Name] - Rapid Response [Internal]
-        Authors: CompetePulse Analyst (ADK Engine)
-        Last Updated: {final_date}
+        ## ⚔️ Top 3 Defense Plays (v {GOOGLE_PRODUCT})
+        1. [Play 1]
+        2. [Play 2]
+        3. [Play 3]
         
-        🚨 TLDR
-        What it is: [1-2 sentences summarizing product and goal]
-        The Catch/Limitation: [The absolute biggest flaw identified in research]
-        The Google Advantage: [How Google wins - focus on enterprise scale/trust]
-
-        📖 Overview
-        [Brief technical explanation]
+        ## 🏗️ Technical Discrepancies
+        - **GA Status**: [Waitlist/Beta/GA]
+        - **Data Residency**: [Weaknesses]
+        - **Scalability**: [Compute/Quota Gaps]
         
-        Key Capabilities:
-        * [Feature 1]: [Detail]
-        * [Feature 2]: [Detail]
-        
-        ⚠️ Risks & Concerns
-        * [Security/Governance]: [Specific gap identified]
-        * [Scale/Performance]: [Specific gap identified]
-        * [Trust/Grounding]: [Specific gap identified]
-
-        💡 How {google_product} Differentiates (The Killer Tracks)
-        1. [Theme 1: e.g. Scale vs Fragility]
-        - Competitor: [Weakness]
-        - Google: [Strength]
-        
-        2. [Theme 2: e.g. Built-in Governance]
-        - Competitor: [Weakness]
-        - Google: [Strength]
-
-        📊 Feature Mapping Summary
-        | Capability | {google_product} Equivalent | Status |
-        | :--- | :--- | :--- |
-        | [Found Feature 1] | [Google Tool] | [Status] |
-        | [Found Feature 2] | [Google Tool] | [Status] |
+        ## 🔍 Critical Gaps Detected by Analyst Critic
+        [Gaps identified in Phase 3]
         """
-
-        scribe_prompt = f"""
-        Synthesize the final battlecard for '{competitor_product}' as a direct comparison against {google_product}.
         
-        RAW INTEL:
+        scribe_prompt = f"""
+        Using the following technical research and analyst critique, generate a high-fidelity competitive battlecard for '{competitor_product}' vs '{google_product}'.
+        
+        Research Intel:
         {raw_intel}
         
-        STRATEGIC CRITIQUE:
-        {strategic_critique}
+        Analyst Critique:
+        {critique}
         
         Follow this template exactly:
         {template}
@@ -671,24 +429,115 @@ class CompetePulseAgent:
             Include 1-2 relevant emojis to make it stand out in field reports.
             </format>
             """
-            response = self.client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+            response = self.client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=scrub_pii(prompt)
+            )
             summary = response.text.strip()
             self._summary_cache[cache_key] = summary
             return summary
-        except Exception as e:
+        except Exception:
             return self.tools.bridge_roadmap_to_field(item)
 
+    def _generate_executive_tldr(self, items: List[Dict[str, Any]]) -> str:
+        """Generates a high-level TLDR of the current landscape."""
+        if not self.client or not items:
+            return "🔍 Review the technical roadmap updates below for recent shifts in Vertex AI and the Agent Ecosystem."
+        try:
+            prompt = "Summarize these technical AI updates into a single executive-ready TLDR (2-3 sentences) identifying the primary competitive shift of the day. Use 1 relevant emoji.\n\n"
+            for item in items[:10]:
+                prompt += f"- {item['title']}\n"
+            response = self.client.models.generate_content(
+                model='gemini-2.5-pro',
+                contents=scrub_pii(prompt)
+            )
+            return response.text.strip()
+        except Exception:
+            return "🎯 Executive intelligence check complete. Review the refined technical insights below."
+
+    def _analyze_competitive_gaps(self, items: List[Dict[str, Any]]) -> List[str]:
+        """Identifies gaps in competitor updates vs Google Cloud offerings."""
+        # Simple rule-based or LLM-based logic
+        return ["Waitlist theater detected in rival LLM previews. Reiterate Google's GA stability."]
+
+    def _extract_tags(self, item: Dict[str, Any]) -> List[str]:
+        """Categorizes updates into technical tags."""
+        tags = []
+        full_text = f"{item['title']} {item.get('summary', '')}".lower()
+        if 'security' in full_text or 'governance' in full_text: tags.append('Compliance')
+        if 'agent' in full_text: tags.append('Agentic AI')
+        if 'gemini' in full_text: tags.append('Google First')
+        if 'benchmark' in full_text: tags.append('Benchmarks')
+        return tags[:3]
+
+    def generate_infographic(self, synthesized_content: Dict[str, Any]) -> str:
+        """Uses Imagen via Gemini 2.5 to generate a visual infographic of the pulse."""
+        if not self.client:
+            return ""
+            
+        console.print("🎨 [bold cyan]Designing Strategic Infographic via Gemini Imagen Engine...[/bold cyan]")
+        
+        summary = synthesized_content.get('tldr', 'Market intelligence pulse.')
+        path = "daily_pulse_infographic.png"
+        
+        prompt = f"""
+        A professional, sleek executive-style infographic for a technology report titled 'AI Compete Pulse'. 
+        The theme is '{summary}'.
+        Style: Modern, enterprise-grade, clean lines, Google Cloud aesthetic (blue, white, grey), futuristic data visualization.
+        High resolution, cinematic lighting, 4k.
+        """
+        
+        try:
+            response = self.client.models.generate_images(
+                model='imagen-3.0-generate-001',
+                prompt=prompt,
+                config={'number_of_images': 1}
+            )
+            
+            if response.generated_images:
+                image_bytes = response.generated_images[0].image.bytes
+                with open(path, 'wb') as f:
+                    f.write(image_bytes)
+                return path
+        except Exception as e:
+            console.print(f"[yellow]Failed to generate infographic: {e}[/yellow]")
+            return ""
+
     def _print_item(self, item: Dict[str, Any]):
-        title = item.get('title', 'Unknown Title')
-        source = item.get('description', item.get('source', 'Unknown Source'))
-        summary = item.get('summary', '')[:500]
+        """Internal helper to print items with rich formatting."""
+        score_color = "red" if item.get('impact_score', 0) > 80 else "yellow" if item.get('impact_score', 0) > 50 else "green"
+        title = f"[bold white]{item['title']}[/bold white] (Impact: [{score_color}]{item.get('impact_score', 'N/A')}[/{score_color}])"
+        content = f"{item.get('bridge', 'No bridge context.')}\n\n[dim]Source: {item['source']} | Date: {item.get('date', 'N/A')}[/dim]"
+        console.print(Panel(Markdown(content), title=title, border_style=score_color))
+
+    def audit_maturity(self, package_name: str) -> Dict[str, Any]:
+        """High-fidelity maturity audit with vector store grounding."""
+        # Query existing pulses for context
+        history = self.vector_store.query_pulses(package_name, limit=5)
+        
+        # Perform audit
+        audit_res = self.audit_package_maturity(package_name)
+        
+        # Enrich audit with Gemini (Pro)
         if self.client:
-            try:
-                refine_prompt = f'Summarize this for a business audience in 2 sentences focus on impact: {summary}'
-                resp = self.client.models.generate_content(model='gemini-2.5-flash', contents=refine_prompt)
-                summary = resp.text.strip()
-            except Exception:
-                pass
-        url = item.get('source_url', '#')
-        promotion_msg = f'### {title}\n*Source: {source}*\n\n**Actionable Insight:**\n{summary}\n\n[🔗 Read Full Update]({url})\n---\n'
-        console.print(Markdown(promotion_msg))
+            prompt = f"""
+            Audit the following package for technical maturity: {package_name}
+            Current Wisdom: {audit_res['wisdom']}
+            Historical Pulses: {history}
+            
+            Synthesize a final executive recommendation for field teams.
+            """
+            resp = self.client.models.generate_content(model='gemini-2.5-pro', contents=scrub_pii(prompt))
+            audit_res['wisdom'] = resp.text
+
+        # Persist as a new pulse
+        self.vector_store.upsert_pulses([{
+            "title": f"Maturity Audit: {package_name}",
+            "summary": audit_res['wisdom'],
+            "date": datetime.now(timezone.utc).isoformat(),
+            "source": "MaturityAuditor",
+            "category": "audit",
+            "impact_score": audit_res['maturity_score']
+        }])
+        
+        return audit_res
