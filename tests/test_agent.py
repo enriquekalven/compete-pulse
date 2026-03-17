@@ -86,7 +86,7 @@ def test_synthesize_reports_with_client(mock_scrub, mock_summarize, mock_vector_
     mock_client = MagicMock()
     agent.client = mock_client
     
-    mock_summarize.return_value = "This matters because of X 🚀"
+    mock_summarize.return_value = ("This matters because of X 🚀", "* Key Feature: A\n* Customer Value: B\n* Sales Play: C")
     mock_scrub.side_effect = lambda x: x
 
     mock_resp_tags = MagicMock()
@@ -104,7 +104,6 @@ def test_synthesize_reports_with_client(mock_scrub, mock_summarize, mock_vector_
     mock_client.models.generate_content.side_effect = [
         mock_resp_ranking,
         mock_resp_tags,
-        mock_resp_summary,
         mock_resp_tldr
     ]
     
@@ -122,7 +121,8 @@ def test_audit_maturity_logic(mock_vector_store_class):
     mock_wisdom = {
         "version": "1.0.0",
         "wisdom": "### Synthesis\n* Key Feature: X",
-        "summary": "Original summary"
+        "summary": "Original summary",
+        "maturity_score": 85
     }
     agent.tools.audit_package_maturity = MagicMock(return_value=mock_wisdom)
     
@@ -167,7 +167,12 @@ def test_generate_infographic(mock_vector_store_class):
         'tldr': 'Market synthesis info'
     }
     
+    mock_resp = MagicMock()
+    mock_resp.generated_images = [MagicMock()]
+    mock_resp.generated_images[0].image.bytes = b'fake_image_bytes'
+    mock_client.models.generate_images.return_value = mock_resp
+    
     path = agent.generate_infographic(synthesized)
     
     assert path == "daily_pulse_infographic.png"
-    assert mock_client.models.generate_image.called
+    assert mock_client.models.generate_images.called

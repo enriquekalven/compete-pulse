@@ -80,14 +80,14 @@ Bridge: {pulse.get('bridge', '')}
                 if os.path.exists(temp_path):
                     os.remove(temp_path)
 
-    def query(self, text: str, n_results: int = 5) -> List[Dict[str, Any]]:
+    def query_pulses(self, text: str, limit: int = 5) -> List[Dict[str, Any]]:
         """
         Queries the Vertex AI RAG Engine for relevant pulses.
         """
         response = rag.retrieval_query(
             text=text,
             rag_corpora=[self.corpus.name],
-            similarity_top_k=n_results
+            similarity_top_k=limit
         )
         
         pulses = []
