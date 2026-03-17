@@ -19,8 +19,9 @@ class EmailBridge:
 
     def __init__(self, recipient: str, sender_email: str=None, sender_password: str=None, smtp_server: str='smtp.gmail.com', smtp_port: int=587):
         self.recipient = recipient
-        self.sender_email = sender_email or os.environ.get('COMPETE_PULSE_SENDER_EMAIL')
-        self.sender_password = sender_password or os.environ.get('COMPETE_PULSE_SENDER_PASSWORD')
+        # Support both new (standardized) and old (legacy) environment variable names
+        self.sender_email = sender_email or os.environ.get('COMPETE_PULSE_SENDER_EMAIL') or os.environ.get('CompetePulse_SENDER_EMAIL')
+        self.sender_password = sender_password or os.environ.get('COMPETE_PULSE_SENDER_PASSWORD') or os.environ.get('CompetePulse_SENDER_PASSWORD')
         self.smtp_server = smtp_server
         self.smtp_port = smtp_port
         self.context_cache = None
@@ -33,9 +34,11 @@ class EmailBridge:
         Formats and sends the report via Email.
         """
         if not self.sender_email or not self.sender_password:
-            console.print('[red]Error: Email credentials (CompetePulse_SENDER_EMAIL/CompetePulse_SENDER_PASSWORD) not set.[/red]')
+            console.print('[red]Error: Email credentials not set.[/red]')
+            console.print('[yellow]Please set COMPETE_PULSE_SENDER_EMAIL and COMPETE_PULSE_SENDER_PASSWORD (App Password).[/yellow]')
             return
         if not knowledge:
+            console.print('[yellow]Note: No updates found to include in the email report. Skipping send.[/yellow]')
             return
         try:
             msg = MIMEMultipart()
@@ -113,7 +116,8 @@ class EmailBridge:
             'Infrastructure': '#64748b', # Slate 500
             'Search': '#f59e0b',   # Amber 500
             'Openai': '#10a37f',   # OpenAI Green
-            'Anthropic': '#cc785c' # Anthropic Tan/Orange
+            'Anthropic': '#cc785c', # Anthropic Tan/Orange
+            'Nvidia': '#76b900'    # NVIDIA Green
         }
 
         # Table of Contents / Radar Section
