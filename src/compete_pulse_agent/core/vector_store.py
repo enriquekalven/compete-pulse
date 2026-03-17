@@ -44,7 +44,7 @@ class CompetePulseVectorStore:
         """
         Stores pulses into the Vertex AI RAG Engine.
         """
-        if not pulses:
+        if not pulses or not self.enabled:
             return
 
         for pulse in pulses:
@@ -84,6 +84,9 @@ Bridge: {pulse.get('bridge', '')}
         """
         Queries the Vertex AI RAG Engine for relevant pulses.
         """
+        if not self.enabled:
+            return []
+            
         response = rag.retrieval_query(
             text=text,
             rag_corpora=[self.corpus.name],
@@ -106,6 +109,8 @@ Bridge: {pulse.get('bridge', '')}
 
     def get_all_pulses(self):
         """Lists files in the corpus."""
+        if not self.enabled:
+            return []
         return rag.list_files(corpus_name=self.corpus.name)
 
     def ingest_uris(self, uris: List[str]):
@@ -113,7 +118,7 @@ Bridge: {pulse.get('bridge', '')}
         Ingests documents from Google Drive or GCS into the RAG corpus.
         Specifically supports Slides, Docs, and Sheets via Google Drive URLs.
         """
-        if not uris:
+        if not uris or not self.enabled:
             return
         
         print(f"📥 Starting ingestion for {len(uris)} URIs into {self.corpus_display_name}...")

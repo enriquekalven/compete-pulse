@@ -248,7 +248,8 @@ class EmailBridge:
         </div>
         ''' if tldr else ''
 
-        gaps_html = self._md_to_html(gaps) if gaps else ''
+        gaps_str = "\n".join(gaps) if isinstance(gaps, list) else gaps
+        gaps_html = self._md_to_html(gaps_str) if gaps_str else ''
         gaps_sec = f'''
         <div style="background: linear-gradient(135deg, #fdf2f2 0%, #fee2e2 100%); border: 1px solid #fecaca; padding: 28px; border-radius: 12px; margin-bottom: 40px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
             <div style="display: flex; align-items: center; margin-bottom: 16px;">
@@ -261,7 +262,7 @@ class EmailBridge:
                 {gaps_html}
             </div>
         </div>
-        ''' if gaps else ''
+        ''' if gaps_str else ''
 
         return f"""
         <!DOCTYPE html>

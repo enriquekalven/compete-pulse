@@ -110,7 +110,7 @@ class CompetePulseAgent:
         self.client = None
         if api_key:
             try:
-                self.client = Client(api_key=api_key, http_options={'api_version': 'v1alpha'})
+                self.client = Client(api_key=api_key, http_options={'api_version': 'v1'})
             except Exception as e:
                 console.print(f"[red]Failed to initialize Gemini Client: {e}[/red]")
         
