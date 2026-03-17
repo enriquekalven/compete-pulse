@@ -56,7 +56,7 @@ def test_query(mock_retrieval, mock_list, mock_init):
     mock_retrieval.return_value = mock_resp
     
     store = CompetePulseVectorStore()
-    results = store.query("test query")
+    results = store.query_pulses("test query")
     
     assert len(results) == 1
     assert results[0]["document"] == "Relevant context text"
