@@ -451,7 +451,11 @@ class CompetePulseAgent:
             for i in items: i['impact_score'] = 0
             return items[:20]
 
-    @retry(wait=wait_exponential(min=2, max=10), stop=stop_after_attempt(3))
+    @retry(
+        wait=wait_exponential(multiplier=1, min=4, max=60), 
+        stop=stop_after_attempt(5),
+        reraise=True
+    )
     def generate_rapid_response(self, competitor_product: str, google_product: str = "Gemini Enterprise") -> str:
         """
         Generates a high-fidelity competitive battlecard using the ADK 'Analyst' pattern:
@@ -490,11 +494,23 @@ class CompetePulseAgent:
         Look for 'Waitlist' vs 'GA' status and specific architectural dependencies.
         Return a comprehensive fact sheet with technical snippets.
         """
-        research_response = self.client.models.generate_content(
-            model='gemini-2.5-pro',
-            contents=scrub_pii(research_prompt),
-            config={'tools': [search_tool]}
-        )
+        try:
+            research_response = self.client.models.generate_content(
+                model='gemini-2.5-pro',
+                contents=scrub_pii(research_prompt),
+                config={'tools': [search_tool]}
+            )
+        except Exception as e:
+            # Fallback for high-demand or quota issues on Pro
+            if "503" in str(e) or "unavailable" in str(e).lower() or "429" in str(e):
+                console.print("[yellow]⚠️ Gemini 2.5 Pro at capacity. Falling back to Gemini 2.5 Flash for deep research...[/yellow]")
+                research_response = self.client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=scrub_pii(research_prompt),
+                    config={'tools': [search_tool]}
+                )
+            else:
+                raise e
         raw_intel = research_response.text
 
         # --- PHASE 3: STRATEGIC CRITIC ---
@@ -572,10 +588,20 @@ class CompetePulseAgent:
         Ensure legal/confidential headers are included. Focus on L400 technical depth.
         """
         
-        final_response = self.client.models.generate_content(
-            model='gemini-2.5-pro',
-            contents=scrub_pii(scribe_prompt)
-        )
+        try:
+            final_response = self.client.models.generate_content(
+                model='gemini-2.5-pro',
+                contents=scrub_pii(scribe_prompt)
+            )
+        except Exception as e:
+            if "503" in str(e) or "unavailable" in str(e).lower() or "429" in str(e):
+                console.print("[yellow]⚠️ Gemini 2.5 Pro at capacity. Falling back to Gemini 2.5 Flash for final synthesis...[/yellow]")
+                final_response = self.client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=scrub_pii(scribe_prompt)
+                )
+            else:
+                raise e
         
         battlecard = final_response.text
         
