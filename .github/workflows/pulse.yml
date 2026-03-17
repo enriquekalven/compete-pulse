@@ -37,9 +37,9 @@ jobs:
       - name: Broadcast Updates
         env:
           GCHAT_WEBHOOK_URL: ${{ secrets.GCHAT_WEBHOOK_URL }}
-          COMPETE_PULSE_SENDER_EMAIL: ${{ secrets.COMPETE_PULSE_SENDER_EMAIL }}
-          COMPETE_PULSE_SENDER_PASSWORD: ${{ secrets.COMPETE_PULSE_SENDER_PASSWORD }}
-          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+          COMPETE_PULSE_SENDER_EMAIL: ${{ secrets.COMPETE_PULSE_SENDER_EMAIL || secrets.CompetePulse_SENDER_EMAIL }}
+          COMPETE_PULSE_SENDER_PASSWORD: ${{ secrets.COMPETE_PULSE_SENDER_PASSWORD || secrets.CompetePulse_SENDER_PASSWORD }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL || secrets.Recipient_Email }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: |
