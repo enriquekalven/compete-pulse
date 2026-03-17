@@ -168,6 +168,16 @@
       "feed": "https://siliconangle.com/category/ai/feed/",
       "description": "SiliconAngle - Enterprise AI & Cloud Trends",
       "category": "competitive"
+    },
+    "nvidia-news": {
+      "feed": "https://blogs.nvidia.com/feed/",
+      "description": "NVIDIA Blog - Official AI, GPU & Data Center News",
+      "category": "competitive"
+    },
+    "nvidia-developer-blog": {
+      "feed": "https://developer.nvidia.com/blog/feed/",
+      "description": "NVIDIA Developer Blog - Technical Deep Dives into AI & CUDA",
+      "category": "competitive"
     }
   },
   "precision_benchmarks": {

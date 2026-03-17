@@ -80,7 +80,7 @@ class CompetePulseTools:
             bridge_context = 'COMPETITIVE ECOSYSTEM: Rival AI platform update. **Google Response:** Leverage Vertex AI Multi-Cloud and the "Open Model Garden" philosophy to offer more choice than locked-in competitors.'
         elif any((term in title_and_source for term in ['benchmark', 'leaderboard', 'arena', 'artificial analysis', 'llm-stats'])):
             bridge_context = 'BENCHMARK SHIFT: New performance data detected. **Google Response:** Pivot from "Raw Speed" to "Production Quality." Highlight Gemini’s consistency, lower hallucination rates in RAG, and the "Enterprise SLOs" that community benchmarks don’t measure.'
-        elif any((term in title_and_source for term in ['compute', 'gpu', 'economics', 'semianalysis'])):
+        elif any((term in title_and_source for term in ['compute', 'gpu', 'nvidia', 'economics', 'semianalysis'])):
             bridge_context = 'COMPUTE INTELLIGENCE: Market shift in AI economics. **Google Response:** Highlight Google’s vertically integrated stack (TPU v5p) which provides better long-term TCO and availability than GPU-constrained competitors.'
         elif any((term in title_and_source for term in ['genkit', 'firebase', 'agent', 'builder'])):
             bridge_context = "GOOGLE ECOSYSTEM: Enhances Agent Builder/Genkit. Field should focus on 'Low-Code to Pro-Code' transition stories."
